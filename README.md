@@ -1,36 +1,122 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NileMobile
 
-## Getting Started
+A modern web application for network management and monitoring, displaying real-time data from various APIs including building information, network devices, and site details.
 
-First, run the development server:
+## Features
 
+- Building information display
+- Network device monitoring
+- Site management
+- Responsive design with Tailwind CSS
+- Static site generation for AWS S3 hosting
+
+## Prerequisites
+
+- Node.js 18.x or later
+- AWS account with S3 access
+- AWS CLI configured with appropriate credentials
+
+## Installation
+
+1. Clone the repository:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/yourusername/nilemobile.git
+cd nilemobile
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Build the project:
+```bash
+npm run build
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Deployment to AWS S3
 
-## Learn More
+1. Create an S3 bucket:
+   - Go to AWS S3 console
+   - Create a new bucket with a unique name (e.g., `nilemobile-website`)
+   - Enable static website hosting in the bucket properties
+   - Set the index document to `index.html`
+   - Set the error document to `404.html`
 
-To learn more about Next.js, take a look at the following resources:
+2. Configure bucket policy:
+   - Go to the bucket's Permissions tab
+   - Add the following bucket policy (replace `your-bucket-name` with your actual bucket name):
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "PublicReadGetObject",
+            "Effect": "Allow",
+            "Principal": "*",
+            "Action": "s3:GetObject",
+            "Resource": "arn:aws:s3:::your-bucket-name/*"
+        }
+    ]
+}
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3. Configure CORS (Cross-Origin Resource Sharing):
+   - Go to the bucket's Permissions tab
+   - Add the following CORS configuration:
+```json
+[
+    {
+        "AllowedHeaders": ["*"],
+        "AllowedMethods": ["GET", "HEAD"],
+        "AllowedOrigins": ["*"],
+        "ExposeHeaders": []
+    }
+]
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+4. Build and deploy the project:
+```bash
+# Build the project
+npm run build
 
-## Deploy on Vercel
+# Install AWS CLI if not already installed
+npm install -g aws-cli
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# Configure AWS credentials
+aws configure
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Deploy to S3
+aws s3 sync ./out s3://your-bucket-name --delete
+```
+
+5. Configure CloudFront (recommended for production):
+   - Create a CloudFront distribution
+   - Set the S3 bucket as the origin
+   - Configure caching settings:
+     - Default TTL: 3600 (1 hour)
+     - Minimum TTL: 0
+     - Maximum TTL: 86400 (24 hours)
+   - Enable HTTPS
+   - Set up SSL certificate
+   - Update your domain's DNS settings to point to the CloudFront distribution
+
+## Development
+
+To run the development server:
+```bash
+npm run dev
+```
+
+## Environment Variables
+
+Create a `.env.local` file in the root directory for local development:
+```env
+# API Endpoints
+NEXT_PUBLIC_BUILDING_API=https://shs53efu7ww47ytm7ljslxtvbe0cjdyt.lambda-url.us-west-2.on.aws/
+NEXT_PUBLIC_DEVICE_API=https://ld5kktc7qjg42pybjunukka3qq0ewtqd.lambda-url.us-west-2.on.aws/
+```
+
+## License
+
+MIT
