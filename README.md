@@ -1,18 +1,16 @@
 # NileMobile
 
-A modern web application for network management and monitoring, displaying real-time data from various APIs including building information, network devices, and site details.
+Network management and monitoring platform.
 
 ## Features
 
 - Building information display
 - Network device monitoring
 - Site management
-- Responsive design with Tailwind CSS
-- Static site generation for AWS S3 hosting
 
 ## Prerequisites
 
-- Node.js 18.x or later
+- Node.js 18.17 or later
 - AWS account with S3 access
 - AWS CLI configured with appropriate credentials
 
@@ -29,93 +27,63 @@ cd nilemobile
 npm install
 ```
 
-3. Build the project:
-```bash
-npm run build
+3. Create a `.env.local` file in the root directory with the following variables:
+```env
+NEXT_PUBLIC_API_URL=https://ld5kktc7qjg42pybjunukka3qq0ewtqd.lambda-url.us-west-2.on.aws/
 ```
-
-## Deployment to AWS S3
-
-1. Create an S3 bucket:
-   - Go to AWS S3 console
-   - Create a new bucket with a unique name (e.g., `nilemobile-website`)
-   - Enable static website hosting in the bucket properties
-   - Set the index document to `index.html`
-   - Set the error document to `404.html`
-
-2. Configure bucket policy:
-   - Go to the bucket's Permissions tab
-   - Add the following bucket policy (replace `your-bucket-name` with your actual bucket name):
-```json
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "PublicReadGetObject",
-            "Effect": "Allow",
-            "Principal": "*",
-            "Action": "s3:GetObject",
-            "Resource": "arn:aws:s3:::your-bucket-name/*"
-        }
-    ]
-}
-```
-
-3. Configure CORS (Cross-Origin Resource Sharing):
-   - Go to the bucket's Permissions tab
-   - Add the following CORS configuration:
-```json
-[
-    {
-        "AllowedHeaders": ["*"],
-        "AllowedMethods": ["GET", "HEAD"],
-        "AllowedOrigins": ["*"],
-        "ExposeHeaders": []
-    }
-]
-```
-
-4. Build and deploy the project:
-```bash
-# Build the project
-npm run build
-
-# Install AWS CLI if not already installed
-npm install -g aws-cli
-
-# Configure AWS credentials
-aws configure
-
-# Deploy to S3
-aws s3 sync ./out s3://your-bucket-name --delete
-```
-
-5. Configure CloudFront (recommended for production):
-   - Create a CloudFront distribution
-   - Set the S3 bucket as the origin
-   - Configure caching settings:
-     - Default TTL: 3600 (1 hour)
-     - Minimum TTL: 0
-     - Maximum TTL: 86400 (24 hours)
-   - Enable HTTPS
-   - Set up SSL certificate
-   - Update your domain's DNS settings to point to the CloudFront distribution
 
 ## Development
 
-To run the development server:
+Run the development server:
 ```bash
 npm run dev
 ```
 
+## Deployment to AWS S3
+
+1. Build the application for static export:
+```bash
+npm run build
+```
+This will create a static export in the `out` directory.
+
+2. Create an S3 bucket for hosting:
+```bash
+aws s3 mb s3://your-bucket-name
+```
+
+3. Configure the S3 bucket for static website hosting:
+```bash
+aws s3 website s3://your-bucket-name --index-document index.html --error-document 404.html
+```
+
+4. Configure bucket policy for public access:
+```bash
+aws s3api put-bucket-policy --bucket your-bucket-name --policy file://bucket-policy.json
+```
+
+5. Configure CORS for the bucket:
+```bash
+aws s3api put-bucket-cors --bucket your-bucket-name --cors-configuration file://cors-config.json
+```
+
+6. Deploy the built files:
+```bash
+aws s3 sync out/ s3://your-bucket-name --delete
+```
+
+7. (Optional) Set up CloudFront for production:
+- Create a CloudFront distribution
+- Set the origin to your S3 bucket
+- Configure the distribution to use the S3 website endpoint
+- Set up SSL certificate for HTTPS
+
 ## Environment Variables
 
-Create a `.env.local` file in the root directory for local development:
-```env
-# API Endpoints
-NEXT_PUBLIC_BUILDING_API=https://shs53efu7ww47ytm7ljslxtvbe0cjdyt.lambda-url.us-west-2.on.aws/
-NEXT_PUBLIC_DEVICE_API=https://ld5kktc7qjg42pybjunukka3qq0ewtqd.lambda-url.us-west-2.on.aws/
-```
+The following environment variables are used in the application:
+
+- `NEXT_PUBLIC_API_URL`: The base URL for the API endpoints
+  - Default: `https://ld5kktc7qjg42pybjunukka3qq0ewtqd.lambda-url.us-west-2.on.aws/`
 
 ## License
 

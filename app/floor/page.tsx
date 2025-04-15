@@ -2,30 +2,34 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 
 interface Floor {
-  floorid: string;
-  number: number;
-  bldgid: string;
   tenantid: string;
-  name: string;
   siteid: string;
+  bldgid: string;
+  floorid: string;
+  name: string;
+  number: string;
 }
 
 export default function FloorPage() {
   const [floors, setFloors] = useState<Floor[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
 
   useEffect(() => {
+    // Skip API call during static export
+    if (typeof window === 'undefined') {
+      setLoading(false);
+      return;
+    }
+
     const controller = new AbortController();
     const { signal } = controller;
 
     const fetchData = async () => {
       try {
-        const response = await fetch('https://ra4ynuzvux66faz2ai5l6m26uy0wmsml.lambda-url.us-west-2.on.aws/', {
+        const response = await fetch('https://ofthddzjjh.execute-api.us-west-2.amazonaws.com/prod/floors', {
           signal,
         });
 
@@ -33,13 +37,14 @@ export default function FloorPage() {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const jsonData = await response.json();
+        const data = await response.json();
         
-        if (!Array.isArray(jsonData)) {
+        if (!Array.isArray(data)) {
           throw new Error('Invalid data format');
         }
 
-        setFloors(jsonData);
+        setFloors(data);
+        setError(null);
       } catch (err) {
         if (err instanceof Error) {
           if (err.name === 'AbortError') {
@@ -66,12 +71,12 @@ export default function FloorPage() {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 flex flex-col items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
-        <button
-          onClick={() => router.push('/')}
+        <Link 
+          href="/" 
           className="mt-4 text-gray-300 hover:text-white"
         >
           Return to Dashboard
-        </button>
+        </Link>
       </div>
     );
   }
@@ -83,12 +88,12 @@ export default function FloorPage() {
           <p className="text-xl font-semibold">Error</p>
           <p>{error}</p>
         </div>
-        <button
-          onClick={() => router.push('/')}
+        <Link 
+          href="/" 
           className="mt-4 text-gray-300 hover:text-white"
         >
           Return to Dashboard
-        </button>
+        </Link>
       </div>
     );
   }
@@ -97,12 +102,12 @@ export default function FloorPage() {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 flex flex-col items-center justify-center">
         <div className="text-gray-300">No floors available</div>
-        <button
-          onClick={() => router.push('/')}
+        <Link 
+          href="/" 
           className="mt-4 text-gray-300 hover:text-white"
         >
           Return to Dashboard
-        </button>
+        </Link>
       </div>
     );
   }
@@ -111,28 +116,28 @@ export default function FloorPage() {
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
       <div className="container mx-auto px-4 py-16">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold">Floor Information</h1>
-          <button
-            onClick={() => router.push('/')}
+          <h1 className="text-4xl font-bold">Floors</h1>
+          <Link 
+            href="/" 
             className="text-gray-300 hover:text-white"
           >
             Return to Dashboard
-          </button>
+          </Link>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {floors.map((floor, index) => (
-            <div key={index} className="bg-gray-800 rounded-lg shadow-md p-6">
-              <h2 className="text-2xl font-semibold mb-4">
-                <Link href={`/floor/${floor.floorid}`} className="hover:text-blue-400 transition-colors duration-200">
-                  {floor.name}
-                </Link>
-              </h2>
+          {floors.map((floor) => (
+            <div key={floor.floorid} className="bg-gray-800 rounded-lg shadow-md p-6">
+              <h2 className="text-2xl font-semibold mb-4">{floor.name}</h2>
               <div className="space-y-2">
-                <p className="text-gray-300">Floor Number: {floor.number}</p>
-                <p className="text-gray-300">Floor ID: {floor.floorid}</p>
-                <p className="text-gray-300">Building ID: {floor.bldgid}</p>
-                <p className="text-gray-300">Tenant ID: {floor.tenantid}</p>
-                <p className="text-gray-300">Site ID: {floor.siteid}</p>
+                <p className="text-gray-300"><span className="font-medium">Floor Number:</span> {floor.number}</p>
+                <div className="mt-4 pt-4 border-t border-gray-600">
+                  <div className="text-gray-300 space-y-2">
+                  <p className="text-gray-300"><span className="font-medium">Tenant ID:</span> {floor.tenantid}</p>
+                  <p className="text-gray-300"><span className="font-medium">Site ID:</span> {floor.siteid}</p>
+                  <p className="text-gray-300"><span className="font-medium">Building ID:</span> {floor.bldgid}</p>  
+                    <p className="text-gray-300"><span className="font-medium">Floor ID:</span> {floor.floorid}</p>
+                  </div>
+                </div>
               </div>
             </div>
           ))}

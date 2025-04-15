@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 
 interface Segment {
+  tenantid: string;
   segment: string;
 }
 
@@ -12,7 +12,6 @@ export default function SegmentsPage() {
   const [segments, setSegments] = useState<Segment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
 
   useEffect(() => {
     const controller = new AbortController();
@@ -20,7 +19,7 @@ export default function SegmentsPage() {
 
     const fetchData = async () => {
       try {
-        const response = await fetch('https://r734rgw5dju6ibxoyx47totfgm0mtxeu.lambda-url.us-west-2.on.aws/', {
+        const response = await fetch('https://ofthddzjjh.execute-api.us-west-2.amazonaws.com/prod/segments', {
           signal,
         });
 
@@ -28,13 +27,14 @@ export default function SegmentsPage() {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const jsonData = await response.json();
+        const data = await response.json();
         
-        if (!Array.isArray(jsonData)) {
+        if (!Array.isArray(data)) {
           throw new Error('Invalid data format');
         }
 
-        setSegments(jsonData);
+        setSegments(data);
+        setError(null);
       } catch (err) {
         if (err instanceof Error) {
           if (err.name === 'AbortError') {
@@ -61,12 +61,12 @@ export default function SegmentsPage() {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 flex flex-col items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
-        <button
-          onClick={() => router.push('/')}
+        <Link 
+          href="/" 
           className="mt-4 text-gray-300 hover:text-white"
         >
           Return to Dashboard
-        </button>
+        </Link>
       </div>
     );
   }
@@ -78,12 +78,12 @@ export default function SegmentsPage() {
           <p className="text-xl font-semibold">Error</p>
           <p>{error}</p>
         </div>
-        <button
-          onClick={() => router.push('/')}
+        <Link 
+          href="/" 
           className="mt-4 text-gray-300 hover:text-white"
         >
           Return to Dashboard
-        </button>
+        </Link>
       </div>
     );
   }
@@ -92,12 +92,12 @@ export default function SegmentsPage() {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 flex flex-col items-center justify-center">
         <div className="text-gray-300">No segments available</div>
-        <button
-          onClick={() => router.push('/')}
+        <Link 
+          href="/" 
           className="mt-4 text-gray-300 hover:text-white"
         >
           Return to Dashboard
-        </button>
+        </Link>
       </div>
     );
   }
@@ -107,21 +107,24 @@ export default function SegmentsPage() {
       <div className="container mx-auto px-4 py-16">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-4xl font-bold">Network Segments</h1>
-          <button
-            onClick={() => router.push('/')}
+          <Link 
+            href="/" 
             className="text-gray-300 hover:text-white"
           >
             Return to Dashboard
-          </button>
+          </Link>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {segments.map((segment, index) => (
-            <div key={index} className="bg-gray-800 rounded-lg shadow-md p-6">
+          {segments.map((segment) => (
+            <div key={segment.segment} className="bg-gray-800 rounded-lg shadow-md p-6">
               <h2 className="text-2xl font-semibold mb-4">
-                <Link href={`/segments/${encodeURIComponent(segment.segment)}`} className="hover:text-blue-400 transition-colors duration-200">
+                <Link href={`/segments/${segment.segment}`} className="hover:text-blue-400 transition-colors duration-200">
                   {segment.segment}
                 </Link>
               </h2>
+              <div className="space-y-2">
+                <p className="text-gray-300"><span className="font-medium">Tenant ID:</span> {segment.tenantid}</p>
+              </div>
             </div>
           ))}
         </div>

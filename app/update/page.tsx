@@ -15,7 +15,7 @@ export default function UpdatePage() {
     setSuccess(false);
 
     try {
-      const response = await fetch('https://dacuf4irelubskiyv6yifkwvey0allfi.lambda-url.us-west-2.on.aws/');
+      const response = await fetch('https://ofthddzjjh.execute-api.us-west-2.amazonaws.com/prod/tenantupdate');
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);

@@ -4,14 +4,11 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
-interface Location {
-  siteId: string;
-  name: string;
-  address: string;
-  tenantid: string;
+interface TimeZone {
+  timeZoneId: string;
 }
 
-interface ParsedAddress {
+interface Address {
   id: string;
   name: string;
   street1: string;
@@ -25,18 +22,25 @@ interface ParsedAddress {
   subRegion: string | null;
   country: string;
   zip: string;
-  timeZone: {
-    timeZoneId: string;
-  };
+  timeZone: TimeZone;
 }
 
-interface SiteData {
-  location: Location;
-  parsedAddress: ParsedAddress;
+interface Site {
+  tenantid: string;
+  siteid: string;
+  name: string;
+  address: string; // JSON string that needs to be parsed
+}
+
+interface ParsedSite {
+  tenantid: string;
+  siteid: string;
+  name: string;
+  address: Address;
 }
 
 export default function SitesPage() {
-  const [sites, setSites] = useState<SiteData[]>([]);
+  const [sites, setSites] = useState<ParsedSite[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -47,7 +51,7 @@ export default function SitesPage() {
 
     const fetchData = async () => {
       try {
-        const response = await fetch('https://xqtppvptwusot3wg5ghl3dycii0alriu.lambda-url.us-west-2.on.aws/', {
+        const response = await fetch('https://ofthddzjjh.execute-api.us-west-2.amazonaws.com/prod/sites', {
           signal,
         });
 
@@ -55,36 +59,31 @@ export default function SitesPage() {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const jsonData = await response.json();
+        const data = await response.json();
         
-        if (!Array.isArray(jsonData)) {
+        if (!Array.isArray(data)) {
           throw new Error('Invalid data format');
         }
 
-        const sitesData: SiteData[] = [];
-        for (const item of jsonData) {
+        const parsedSites = data.map((site: Site) => {
           try {
-            const parsedAddress = JSON.parse(item.address) as ParsedAddress;
-            sitesData.push({
-              location: {
-                siteId: item.siteid,
-                name: item.name,
-                address: item.address,
-                tenantid: item.tenantid,
-              },
-              parsedAddress,
-            });
+            const parsedAddress = JSON.parse(site.address) as Address;
+            return {
+              ...site,
+              address: parsedAddress
+            };
           } catch (e) {
             console.error('Error parsing address:', e);
-            continue;
+            throw new Error('Invalid address format in site data');
           }
-        }
+        });
 
-        if (sitesData.length === 0) {
+        if (parsedSites.length === 0) {
           throw new Error('No valid sites found');
         }
 
-        setSites(sitesData);
+        setSites(parsedSites);
+        setError(null);
       } catch (err) {
         if (err instanceof Error) {
           if (err.name === 'AbortError') {
@@ -165,28 +164,32 @@ export default function SitesPage() {
           </button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {sites.map((site, index) => (
-            <div key={index} className="bg-gray-800 rounded-lg shadow-md p-6">
+          {sites.map((site) => (
+            <div key={site.siteid} className="bg-gray-800 rounded-lg shadow-md p-6">
               <h2 className="text-2xl font-semibold mb-4">
-                <Link href={`/sites/${site.location.siteId}`} className="hover:text-blue-400 transition-colors duration-200">
-                  {site.location.name}
+                <Link href={`/sites/${site.siteid}`} className="hover:text-blue-400 transition-colors duration-200">
+                  {site.name}
                 </Link>
               </h2>
               <div className="space-y-2">
-                <p className="text-gray-300">Tenant ID: {site.location.tenantid}</p>
-                <p className="text-gray-300">Address: {site.parsedAddress.street1}</p>
-                {site.parsedAddress.street2 && (
-                  <p className="text-gray-300">Address Line 2: {site.parsedAddress.street2}</p>
+                <p className="text-gray-300">Address: {site.address.street1}</p>
+                {site.address.street2 && (
+                  <p className="text-gray-300">Address Line 2: {site.address.street2}</p>
                 )}
                 <p className="text-gray-300">
-                  {site.parsedAddress.city}, {site.parsedAddress.state} {site.parsedAddress.zip}
+                  {site.address.city}, {site.address.state} {site.address.zip}
                 </p>
-                <p className="text-gray-300">Country: {site.parsedAddress.country}</p>
-                <p className="text-gray-300">Time Zone: {site.parsedAddress.timeZone.timeZoneId}</p>
+                <p className="text-gray-300">Country: {site.address.country}</p>
+                <p className="text-gray-300">Time Zone: {site.address.timeZone.timeZoneId}</p>
                 <p className="text-gray-300">
-                  Coordinates: {site.parsedAddress.latitude}, {site.parsedAddress.longitude}
+                  Coordinates: {site.address.latitude}, {site.address.longitude}
                 </p>
-                <p className="text-gray-300">Altitude: {site.parsedAddress.altitude}m</p>
+                <div className="mt-4 pt-4 border-t border-gray-600">
+                  <div className="text-gray-300 space-y-2">
+                    <p className="text-gray-300">Tenant ID: {site.tenantid}</p>
+                    <p className="text-gray-300">Site ID: {site.siteid}</p>
+                  </div>
+                </div>
               </div>
             </div>
           ))}
