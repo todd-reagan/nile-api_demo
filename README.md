@@ -1,90 +1,137 @@
-# NileMobile
+# Nile Mobile Dashboard
 
-Network management and monitoring platform.
+A Next.js application for network management and monitoring.
+
+## Project Structure
+
+The project has been organized with a focus on maintainability, reusability, and performance:
+
+```
+app/
+├── components/
+│   ├── TreeView.tsx
+│   └── ui/
+│       ├── Card.tsx
+│       ├── DataItem.tsx
+│       ├── ErrorDisplay.tsx
+│       ├── ErrorState.tsx
+│       ├── LoadingSpinner.tsx
+│       ├── LoadingState.tsx
+│       ├── PageLayout.tsx
+│       ├── ReturnToDashboard.tsx
+│       └── index.ts
+├── constants/
+│   └── index.ts
+├── hooks/
+│   ├── useFetch.ts
+│   ├── useForm.ts
+│   └── index.ts
+├── services/
+│   └── api.ts
+├── types/
+│   └── index.ts
+├── utils/
+│   └── dataTransformers.ts
+├── favicon.ico
+├── globals.css
+├── layout.tsx
+└── page.tsx
+```
 
 ## Features
 
-- Building information display
-- Network device monitoring
-- Site management
+- Dashboard with links to different sections
+- Overview of tenant hierarchy
+- Site information management
+- Building information management
+- Floor information management
+- Network segments management
+- Device approval and authentication
+- Database update functionality
 
-## Prerequisites
+## Recent Improvements
 
-- Node.js 18.17 or later
-- AWS account with S3 access
-- AWS CLI configured with appropriate credentials
+### Code Organization
 
-## Installation
+- Created a shared `/types` directory for interface definitions
+- Implemented reusable UI components in `/components/ui`
+- Centralized API calls in a service layer
+- Added utility functions for data transformation
+- Created custom hooks for data fetching and form handling
+- Extracted constants to a dedicated file
 
-1. Clone the repository:
+### UI Components
+
+- `LoadingSpinner`: Consistent loading indicator
+- `ErrorDisplay`: Standardized error messaging
+- `PageLayout`: Consistent page structure
+- `ReturnToDashboard`: Navigation component
+- `LoadingState`: Full-page loading state
+- `ErrorState`: Full-page error state
+- `Card`: Reusable card component for displaying information
+- `DataItem`: Component for displaying key-value pairs
+
+### Custom Hooks
+
+- `useFetch`: Simplifies data fetching with loading and error states
+- `useForm`: Handles form state management
+
+### Utilities
+
+- `dataTransformers.ts`: Functions for parsing and formatting data
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18.x or higher
+- npm or yarn
+
+### Installation
+
 ```bash
-git clone https://github.com/yourusername/nilemobile.git
-cd nilemobile
-```
-
-2. Install dependencies:
-```bash
+# Install dependencies
 npm install
-```
 
-3. Create a `.env.local` file in the root directory with the following variables:
-```env
-NEXT_PUBLIC_API_URL=https://ld5kktc7qjg42pybjunukka3qq0ewtqd.lambda-url.us-west-2.on.aws/
-```
-
-## Development
-
-Run the development server:
-```bash
+# Run the development server
 npm run dev
+```
+
+The application will be available at [http://localhost:3000](http://localhost:3000).
+
+### Building for Production
+
+```bash
+# Build the application for static export
+npm run build
+
+# The output will be in the 'out' directory, ready for deployment to S3 or other static hosting
 ```
 
 ## Deployment to AWS S3
 
-1. Build the application for static export:
-```bash
-npm run build
-```
-This will create a static export in the `out` directory.
+This application is configured for static hosting on AWS S3. The following changes have been made to support S3 hosting:
 
-2. Create an S3 bucket for hosting:
-```bash
-aws s3 mb s3://your-bucket-name
-```
+1. Updated `next.config.js` with:
+   - `output: 'export'` for static HTML export
+   - `images: { unoptimized: true }` for static image handling
+   - `trailingSlash: false` for URL formatting
 
-3. Configure the S3 bucket for static website hosting:
-```bash
-aws s3 website s3://your-bucket-name --index-document index.html --error-document 404.html
-```
+2. All internal links use `.html` extension:
+   - Dashboard links in `constants/index.ts`
+   - Return to Dashboard links in `ReturnToDashboard.tsx`
+   - Navigation links in various pages
 
-4. Configure bucket policy for public access:
-```bash
-aws s3api put-bucket-policy --bucket your-bucket-name --policy file://bucket-policy.json
-```
+When deploying to S3:
+1. Upload the contents of the `out` directory to your S3 bucket
+2. Configure the bucket for static website hosting
+3. Set the index document to `index.html`
+4. Set appropriate permissions for public access
 
-5. Configure CORS for the bucket:
-```bash
-aws s3api put-bucket-cors --bucket your-bucket-name --cors-configuration file://cors-config.json
-```
+## Technologies Used
 
-6. Deploy the built files:
-```bash
-aws s3 sync out/ s3://your-bucket-name --delete
-```
-
-7. (Optional) Set up CloudFront for production:
-- Create a CloudFront distribution
-- Set the origin to your S3 bucket
-- Configure the distribution to use the S3 website endpoint
-- Set up SSL certificate for HTTPS
-
-## Environment Variables
-
-The following environment variables are used in the application:
-
-- `NEXT_PUBLIC_API_URL`: The base URL for the API endpoints
-  - Default: `https://ld5kktc7qjg42pybjunukka3qq0ewtqd.lambda-url.us-west-2.on.aws/`
-
-## License
-
-MIT
+- Next.js 15.3.0
+- React 19.0.0
+- TypeScript
+- Tailwind CSS 4
+- react-complex-tree (for tree view components)

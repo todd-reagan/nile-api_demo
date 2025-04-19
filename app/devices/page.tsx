@@ -1,110 +1,67 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-
-interface GeoScope {
-  siteIds: string[];
-  buildingIds: string[];
-  floorIds: string[];
-}
-
-interface NetworkDevice {
-  id: string;
-  macAddress: string;
-  tenantid: string;
-  siteid: string;
-  buildingid: string;
-  floorid: string;
-  zoneid: string;
-  segmentid: string;
-  deviceid: string;
-  port: string;
-  state: string;
-  geoScope: GeoScope;
-  authenticatedBy: string;
-  staticip: string | null;
-  ipaddress: string | null;
-}
+import { NetworkDevice } from '../types';
+import { useFetch } from '../hooks';
+import { fetchDevices } from '../services/api';
+import { PageLayout, LoadingState, ErrorState, DataItem } from '../components/ui';
 
 export default function NetworkDevicesPage() {
   const router = useRouter();
-  const [devices, setDevices] = useState<NetworkDevice[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: devices, loading, error } = useFetch<NetworkDevice[]>(fetchDevices);
 
-  useEffect(() => {
-    const fetchDevices = async () => {
-      try {
-        const response = await fetch('https://ofthddzjjh.execute-api.us-west-2.amazonaws.com/prod/devices');
-        if (!response.ok) throw new Error('Failed to fetch device data');
-        const data = await response.json();
-        setDevices(data);
-      } catch (err) {
-        console.error('Error fetching devices:', err);
-        setError('Failed to load network devices');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDevices();
-  }, []);
-
-  const handleRowClick = (device: NetworkDevice) => {
-    router.push(`/macauth?deviceId=${device.id}&macAddress=${device.macAddress}`);
+  const handleCardClick = (device: NetworkDevice) => {
+    router.push(`/macauth.html?deviceId=${device.id}&macAddress=${device.macAddress}`);
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 p-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-white">Network Devices</h1>
-          <Link 
-            href="/" 
-            className="text-gray-300 hover:text-white transition-colors duration-200"
-          >
-            Return to Dashboard
-          </Link>
-        </div>
+  if (loading) {
+    return <LoadingState message="Loading devices..." />;
+  }
 
-        {loading ? (
-          <div className="text-center text-gray-300">Loading devices...</div>
-        ) : error ? (
-          <div className="text-center text-red-500">Error: {error}</div>
-        ) : (
-          <div className="bg-gray-800 rounded-lg overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-700">
-              <thead className="bg-gray-700">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">MAC Address</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Port</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">State</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Authentication</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">IP Address</th>
-                </tr>
-              </thead>
-              <tbody className="bg-gray-800 divide-y divide-gray-700">
-                {devices.map((device) => (
-                  <tr 
-                    key={device.id}
-                    data-device-id={device.id}
-                    onClick={() => handleRowClick(device)}
-                    className="hover:bg-gray-700 cursor-pointer transition-colors duration-150"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{device.macAddress}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{device.port}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{device.state}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{device.authenticatedBy}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{device.ipaddress || 'N/A'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+  if (error) {
+    return <ErrorState message={error} />;
+  }
+
+  if (!devices || devices.length === 0) {
+    return <ErrorState title="No Data" message="No devices found" />;
+  }
+
+  return (
+    <PageLayout title="Network Devices">
+      <div className="space-y-4">
+        {devices.map((device) => (
+          <div 
+            key={device.id}
+            onClick={() => handleCardClick(device)}
+            className="bg-gray-800 rounded-lg p-4 shadow-md hover:bg-gray-700 cursor-pointer transition-colors duration-150"
+          >
+            <div className="flex flex-col space-y-2">
+              <div className="flex justify-between items-center border-b border-gray-700 pb-2 mb-2">
+                <h3 className="text-lg font-semibold text-white">{device.macAddress}</h3>
+                <span className={`px-2 py-1 rounded text-xs font-medium ${
+                  device.state === 'Approved' ? 'bg-green-900 text-green-200' : 
+                  device.state === 'Denied' ? 'bg-red-900 text-red-200' : 
+                  'bg-yellow-900 text-yellow-200'
+                }`}>
+                  {device.state}
+                </span>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <DataItem label="Port" value={device.port} />
+                <DataItem label="Authentication" value={device.authenticatedBy} />
+                <DataItem label="IP Address" value={device.ipaddress || 'N/A'} />
+                <DataItem label="Device ID" value={device.deviceid} />
+              </div>
+              
+              {/* Additional information that can be shown/hidden */}
+              <div className="mt-2 pt-2 border-t border-gray-700 text-xs text-gray-400">
+                Click to manage device authorization
+              </div>
+            </div>
           </div>
-        )}
+        ))}
       </div>
-    </div>
+    </PageLayout>
   );
-} 
+}
