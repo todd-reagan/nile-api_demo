@@ -145,3 +145,11 @@ export interface TreeViewData {
     }>;
   }>;
 }
+
+// Dashboard item interface
+export interface DashboardItem {
+  title: string;
+  description: string;
+  href: string;
+  requiresAuth?: boolean;
+}

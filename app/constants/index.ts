@@ -1,3 +1,5 @@
+import { DashboardItem } from '../types';
+
 // API URLs
 export const API_BASE_URL = 'https://ofthddzjjh.execute-api.us-west-2.amazonaws.com/prod';
 export const AUTH_API_URL = 'https://r734rgw5dju6ibxoyx47totfgm0mtxeu.lambda-url.us-west-2.on.aws/';
@@ -21,40 +23,65 @@ export const DEVICE_STATUS_OPTIONS = [
 ];
 
 // Navigation items for the dashboard
-export const DASHBOARD_ITEMS = [
+export const DASHBOARD_ITEMS: DashboardItem[] = [
   {
     title: 'Overview',
     description: 'View tenant hierarchy',
     href: '/overview.html',
+    requiresAuth: true,
   },
   {
     title: 'Site Information',
     description: 'View Site details',
     href: '/sites.html',
+    requiresAuth: true,
   },
   {
     title: 'Building Information',
     description: 'View building details',
     href: '/bldg.html',
+    requiresAuth: true,
   },
   {
     title: 'Floor Information',
     description: 'View floor details',
     href: '/floor.html',
+    requiresAuth: true,
   },
   {
     title: 'Network Segments',
     description: 'View network segments details',
     href: '/segments.html',
+    requiresAuth: true,
+  },
+  {
+    title: 'Client Information',
+    description: 'View client configuration details',
+    href: '/clients',
+    requiresAuth: true,
   },
   {
     title: 'Devices Needing Approval',
     description: 'View device details waiting for approval',
     href: '/devices.html',
+    requiresAuth: true,
+  },
+  {
+    title: 'Port Viewer',
+    description: 'Visualize switch port connectivity',
+    href: '/port-viewer',
+    requiresAuth: true,
   },
   {
     title: 'Update Database Data',
     description: 'Refresh and update all database information',
     href: '/update.html',
+    requiresAuth: true,
+  },
+  {
+    title: 'User Profile',
+    description: 'Manage your profile and API keys',
+    href: '/profile',
+    requiresAuth: true,
   },
 ];

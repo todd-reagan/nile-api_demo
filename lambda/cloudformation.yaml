@@ -1,0 +1,223 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'CloudFormation template for API Keys management with Lambda and DynamoDB'
+
+Parameters:
+  ApiKeysTableName:
+    Type: String
+    Default: UserApiKeys
+    Description: Name of the DynamoDB table to store API keys
+  
+  LambdaFunctionName:
+    Type: String
+    Default: ApiKeysHandler
+    Description: Name of the Lambda function to handle API key operations
+  
+  ApiGatewayStageName:
+    Type: String
+    Default: prod
+    Description: Stage name for the API Gateway deployment
+  
+  CognitoUserPoolId:
+    Type: String
+    Description: ID of the Cognito User Pool to use for authorization
+
+Resources:
+  # DynamoDB Table for storing API keys
+  ApiKeysTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Ref ApiKeysTableName
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+        - AttributeName: keyId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+        - AttributeName: keyId
+          KeyType: RANGE
+      Tags:
+        - Key: Application
+          Value: NileApiDemo
+  
+  # IAM Role for Lambda function
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: DynamoDBAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:DeleteItem
+                  - dynamodb:Query
+                  - dynamodb:DescribeTable
+                Resource: !GetAtt ApiKeysTable.Arn
+              - Effect: Allow
+                Action:
+                  - dynamodb:CreateTable
+                  - dynamodb:DescribeTable
+                  - dynamodb:ListTables
+                Resource: "*"  # Allow creating tables in any region
+  
+  # Lambda function for API key management
+  ApiKeysLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Ref LambdaFunctionName
+      Handler: api_keys_handler.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Runtime: python3.9
+      Timeout: 30
+      MemorySize: 128
+      Environment:
+        Variables:
+          API_KEYS_TABLE: !Ref ApiKeysTableName
+          DEBUG: 'false'
+      Code:
+        ZipFile: |
+          # This is a placeholder. The actual code should be deployed separately.
+          # See the api_keys_handler.py file for the full implementation.
+          def lambda_handler(event, context):
+              return {
+                  'statusCode': 200,
+                  'body': '{"message": "This is a placeholder. Please deploy the actual code."}'
+              }
+      Tags:
+        - Key: Application
+          Value: NileApiDemo
+  
+  # API Gateway REST API
+  ApiGatewayRestApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: ApiKeysManagementApi
+      Description: API for managing user API keys
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+  
+  # Cognito Authorizer for API Gateway
+  CognitoAuthorizer:
+    Type: AWS::ApiGateway::Authorizer
+    Properties:
+      Name: CognitoUserPoolAuthorizer
+      RestApiId: !Ref ApiGatewayRestApi
+      Type: COGNITO_USER_POOLS
+      IdentitySource: method.request.header.Authorization
+      ProviderARNs:
+        - !Sub arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${CognitoUserPoolId}
+  
+  # API Gateway Resource for /api-keys
+  ApiKeysResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ParentId: !GetAtt ApiGatewayRestApi.RootResourceId
+      PathPart: api-keys
+  
+  # API Gateway Method for GET /api-keys
+  ApiKeysGetMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiKeysResource
+      HttpMethod: GET
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref CognitoAuthorizer
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ApiKeysLambdaFunction.Arn}/invocations
+  
+  # API Gateway Method for POST /api-keys
+  ApiKeysPostMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiKeysResource
+      HttpMethod: POST
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref CognitoAuthorizer
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ApiKeysLambdaFunction.Arn}/invocations
+  
+  # API Gateway Method for PUT /api-keys
+  ApiKeysPutMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiKeysResource
+      HttpMethod: PUT
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref CognitoAuthorizer
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ApiKeysLambdaFunction.Arn}/invocations
+  
+  # API Gateway Method for DELETE /api-keys
+  ApiKeysDeleteMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiKeysResource
+      HttpMethod: DELETE
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref CognitoAuthorizer
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ApiKeysLambdaFunction.Arn}/invocations
+  
+  # API Gateway Deployment
+  ApiGatewayDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn:
+      - ApiKeysGetMethod
+      - ApiKeysPostMethod
+      - ApiKeysPutMethod
+      - ApiKeysDeleteMethod
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      StageName: !Ref ApiGatewayStageName
+  
+  # Lambda Permission for API Gateway
+  LambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref ApiKeysLambdaFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/*
+
+Outputs:
+  ApiKeysTableName:
+    Description: Name of the DynamoDB table storing API keys
+    Value: !Ref ApiKeysTable
+  
+  ApiKeysLambdaFunction:
+    Description: Name of the Lambda function handling API key operations
+    Value: !Ref ApiKeysLambdaFunction
+  
+  ApiGatewayEndpoint:
+    Description: URL of the API Gateway endpoint
+    Value: !Sub https://${ApiGatewayRestApi}.execute-api.${AWS::Region}.amazonaws.com/${ApiGatewayStageName}/api-keys

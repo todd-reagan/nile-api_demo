@@ -10,6 +10,8 @@ The project has been organized with a focus on maintainability, reusability, and
 app/
 ├── components/
 │   ├── TreeView.tsx
+│   ├── auth/
+│   │   └── ProtectedRoute.tsx
 │   └── ui/
 │       ├── Card.tsx
 │       ├── DataItem.tsx
@@ -17,21 +19,55 @@ app/
 │       ├── ErrorState.tsx
 │       ├── LoadingSpinner.tsx
 │       ├── LoadingState.tsx
+│       ├── Navigation.tsx
 │       ├── PageLayout.tsx
 │       ├── ReturnToDashboard.tsx
+│       ├── ReturnToDevices.tsx
 │       └── index.ts
+├── config/
+│   └── cognito.ts
 ├── constants/
 │   └── index.ts
+├── contexts/
+│   └── AuthContext.tsx
 ├── hooks/
 │   ├── useFetch.ts
 │   ├── useForm.ts
 │   └── index.ts
 ├── services/
-│   └── api.ts
+│   ├── api.ts
+│   ├── auth.ts
+│   └── apiKeyApi.ts
 ├── types/
 │   └── index.ts
 ├── utils/
 │   └── dataTransformers.ts
+├── bldg/
+│   └── page.tsx
+├── clients/
+│   └── page.tsx
+├── devices/
+│   └── page.tsx
+├── floor/
+│   └── page.tsx
+├── login/
+│   └── page.tsx
+├── macauth/
+│   └── page.tsx
+├── overview/
+│   └── page.tsx
+├── port-viewer/
+│   └── page.tsx
+├── profile/
+│   └── page.tsx
+├── segments/
+│   └── page.tsx
+├── signup/
+│   └── page.tsx
+├── sites/
+│   └── page.tsx
+├── update/
+│   └── page.tsx
 ├── favicon.ico
 ├── globals.css
 ├── layout.tsx
@@ -46,10 +82,26 @@ app/
 - Building information management
 - Floor information management
 - Network segments management
+- Client information with device details
 - Device approval and authentication
+- Port viewer for switch port connectivity
 - Database update functionality
+- Raw API data views for debugging and development
 
 ## Recent Improvements
+
+### API Data Visualization
+
+- Added raw JSON views to key pages (Sites, Buildings, Floors, Segments) for direct API response inspection
+- Created a new Client Information page that displays client device data in a card-based format
+- Implemented robust retry logic with variable backoff for API calls to handle 401 errors
+- Added copy-to-clipboard functionality for all raw JSON data
+
+### Port Viewer
+
+- Added a visual port viewer for switch port connectivity
+- Implemented port coloring based on network segment assignments
+- Added responsive design for different screen sizes
 
 ### Code Organization
 
