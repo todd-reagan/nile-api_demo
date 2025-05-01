@@ -136,9 +136,24 @@ export default function FloorPage() {
             <DataItem label="Floor Number" value={floor.number} />
             
             <div className="mt-4 pt-4 border-t border-gray-600">
+              {/* Location Information */}
+              <h4 className="text-sm font-medium text-gray-400 mb-2">Location</h4>
+              {floor.siteName && (
+                <DataItem 
+                  label="Site" 
+                  value={`${floor.siteName} (${floor.siteid})`} 
+                />
+              )}
+              {floor.buildingName && (
+                <DataItem 
+                  label="Building" 
+                  value={`${floor.buildingName} (${floor.bldgid})`} 
+                />
+              )}
+              
+              {/* Technical IDs */}
+              <h4 className="text-sm font-medium text-gray-400 mt-4 mb-2">Technical Details</h4>
               <DataItem label="Tenant ID" value={floor.tenantid} />
-              <DataItem label="Site ID" value={floor.siteid} />
-              <DataItem label="Building ID" value={floor.bldgid} />
               <DataItem label="Floor ID" value={floor.floorid} />
             </div>
           </Card>

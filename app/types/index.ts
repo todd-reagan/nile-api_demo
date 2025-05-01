@@ -65,7 +65,9 @@ export interface ParsedBuilding {
 export interface Floor {
   tenantid: string;
   siteid: string;
+  siteName?: string;
   bldgid: string;
+  buildingName?: string;
   floorid: string;
   name: string;
   number: string;
