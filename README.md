@@ -201,7 +201,7 @@ When deploying to S3:
 
 MIT License
 
-Copyright (c) 2025 Todd Reagan
+Copyright (c) 2025 Nile Global Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
