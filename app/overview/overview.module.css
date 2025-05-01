@@ -6,6 +6,12 @@
   background-color: transparent; /* Transparent background to match parent */
   border-radius: 6px;
   padding: 8px;
+  
+  /* Set custom CSS variables for the tree component */
+  --rct-color-tree-bg: #101828;
+  --rct-color-tree-focus-outline: #101828;
+  --rct-color-drag-between-line-bg: #101828;
+  --rct-color-focustree-item-focused-border: #101828;
 }
 
 .treeContainer :global(.rct-tree-item-title-container) {
