@@ -1,0 +1,31 @@
+/* Custom styles for the tree view */
+.treeContainer {
+  max-height: 600px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.treeContainer :global(.rct-tree-item-title-container) {
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.treeContainer :global(.rct-tree-item-title-container:hover) {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.treeContainer :global(.rct-tree-item-title-container.rct-tree-item-title-container-selected) {
+  background-color: rgba(59, 130, 246, 0.5);
+}
+
+.treeContainer :global(.rct-tree-items-container) {
+  padding-left: 16px;
+}
+
+.treeContainer :global(.rct-tree-item-arrow) {
+  color: #9ca3af;
+}
+
+.treeContainer :global(.rct-tree-item-button) {
+  color: #e5e7eb;
+}
