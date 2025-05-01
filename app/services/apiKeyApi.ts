@@ -3,8 +3,9 @@
 import { getJwtToken } from './auth';
 import { ApiKey } from './auth';
 
-// Replace this with your actual API Gateway endpoint URL after deployment
-const API_ENDPOINT = 'https://ofthddzjjh.execute-api.us-west-2.amazonaws.com/prod/api-keys';
+// API endpoint for API keys management
+// In a production environment, this should be loaded from environment variables
+const API_ENDPOINT = process.env.NEXT_PUBLIC_API_KEYS_ENDPOINT || 'https://api.example.com/prod/api-keys';
 
 /**
  * Extract user ID from JWT token

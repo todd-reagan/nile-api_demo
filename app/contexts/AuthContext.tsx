@@ -33,8 +33,28 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   // Check if user is authenticated on mount
   useEffect(() => {
+    // Skip authentication check during server-side rendering
+    if (typeof window === 'undefined') {
+      setIsLoading(false);
+      return;
+    }
+
     const checkAuth = async () => {
       try {
+        // Check if we have valid Cognito credentials
+        const hasValidConfig = 
+          process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID && 
+          process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID !== 'your-user-pool-id' &&
+          process.env.NEXT_PUBLIC_COGNITO_APP_CLIENT_ID && 
+          process.env.NEXT_PUBLIC_COGNITO_APP_CLIENT_ID !== 'your-app-client-id';
+
+        // Skip authentication if we don't have valid credentials
+        if (!hasValidConfig) {
+          console.warn('Skipping authentication check due to missing or invalid Cognito configuration');
+          setIsLoading(false);
+          return;
+        }
+
         const currentUser = await authService.getCurrentUser();
         if (currentUser) {
           setUser(currentUser);

@@ -9,11 +9,15 @@ import {
 } from 'amazon-cognito-identity-js';
 import { COGNITO_CONFIG } from '../config/cognito';
 
+// Check if we're in a browser environment
+const isBrowser = typeof window !== 'undefined';
+
 // Create a user pool with the configuration
-const userPool = new CognitoUserPool({
+// Only create it if we're in a browser environment
+const userPool = isBrowser ? new CognitoUserPool({
   UserPoolId: COGNITO_CONFIG.USER_POOL_ID,
   ClientId: COGNITO_CONFIG.APP_CLIENT_ID,
-});
+}) : null;
 
 // Interface for user attributes
 export interface UserAttributes {
@@ -40,6 +44,11 @@ export const signUp = async (
   attributes: UserAttributes
 ): Promise<any> => {
   return new Promise((resolve, reject) => {
+    if (!userPool) {
+      reject(new Error('Cognito User Pool is not initialized'));
+      return;
+    }
+
     // Convert attributes to CognitoUserAttributes
     const attributeList = Object.keys(attributes).map((key) => {
       return new CognitoUserAttribute({
@@ -70,6 +79,11 @@ export const confirmRegistration = async (
   code: string
 ): Promise<any> => {
   return new Promise((resolve, reject) => {
+    if (!userPool) {
+      reject(new Error('Cognito User Pool is not initialized'));
+      return;
+    }
+
     const cognitoUser = new CognitoUser({
       Username: username,
       Pool: userPool,
@@ -91,6 +105,11 @@ export const signIn = async (
   password: string
 ): Promise<CognitoUserSession> => {
   return new Promise((resolve, reject) => {
+    if (!userPool) {
+      reject(new Error('Cognito User Pool is not initialized'));
+      return;
+    }
+
     const authenticationDetails = new AuthenticationDetails({
       Username: username,
       Password: password,
@@ -114,6 +133,11 @@ export const signIn = async (
 
 // Sign out the current user
 export const signOut = (): void => {
+  if (!userPool) {
+    console.warn('Cognito User Pool is not initialized');
+    return;
+  }
+  
   const cognitoUser = userPool.getCurrentUser();
   if (cognitoUser) {
     cognitoUser.signOut();
@@ -123,6 +147,12 @@ export const signOut = (): void => {
 // Get the current authenticated user
 export const getCurrentUser = (): Promise<CognitoUser | null> => {
   return new Promise((resolve) => {
+    if (!userPool) {
+      console.warn('Cognito User Pool is not initialized');
+      resolve(null);
+      return;
+    }
+    
     const cognitoUser = userPool.getCurrentUser();
 
     if (!cognitoUser) {
@@ -143,6 +173,12 @@ export const getCurrentUser = (): Promise<CognitoUser | null> => {
 // Get the current user's session
 export const getCurrentSession = (): Promise<CognitoUserSession | null> => {
   return new Promise((resolve) => {
+    if (!userPool) {
+      console.warn('Cognito User Pool is not initialized');
+      resolve(null);
+      return;
+    }
+    
     const cognitoUser = userPool.getCurrentUser();
 
     if (!cognitoUser) {
@@ -163,6 +199,12 @@ export const getCurrentSession = (): Promise<CognitoUserSession | null> => {
 // Get the current user's attributes
 export const getUserAttributes = (): Promise<UserAttributes | null> => {
   return new Promise((resolve, reject) => {
+    if (!userPool) {
+      console.warn('Cognito User Pool is not initialized');
+      resolve(null);
+      return;
+    }
+    
     const cognitoUser = userPool.getCurrentUser();
 
     if (!cognitoUser) {
@@ -203,6 +245,11 @@ export const updateUserAttributes = async (
   attributes: UserAttributes
 ): Promise<void> => {
   return new Promise((resolve, reject) => {
+    if (!userPool) {
+      reject(new Error('Cognito User Pool is not initialized'));
+      return;
+    }
+    
     const cognitoUser = userPool.getCurrentUser();
 
     if (!cognitoUser) {
@@ -241,6 +288,11 @@ export const changePassword = async (
   newPassword: string
 ): Promise<void> => {
   return new Promise((resolve, reject) => {
+    if (!userPool) {
+      reject(new Error('Cognito User Pool is not initialized'));
+      return;
+    }
+    
     const cognitoUser = userPool.getCurrentUser();
 
     if (!cognitoUser) {
