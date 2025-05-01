@@ -1,7 +1,10 @@
 // Amazon Cognito configuration
 
+// NOTE: This is an example configuration file.
+// In a production environment, these values should be loaded from environment variables
+// or a secure configuration management system.
 export const COGNITO_CONFIG = {
-  REGION: 'us-west-2', // Replace with your AWS region
-  USER_POOL_ID: 'us-west-2_HTzF4SAPE', // Replace with your Cognito User Pool ID
-  APP_CLIENT_ID: '1g6p3cfbssluljelcl88re6dm1', // Replace with your App Client ID
+  REGION: process.env.NEXT_PUBLIC_AWS_REGION || 'us-west-2',
+  USER_POOL_ID: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID || 'your-user-pool-id',
+  APP_CLIENT_ID: process.env.NEXT_PUBLIC_COGNITO_APP_CLIENT_ID || 'your-app-client-id',
 };

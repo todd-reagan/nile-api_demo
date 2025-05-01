@@ -144,7 +144,21 @@ app/
 ```bash
 # Install dependencies
 npm install
+
+# Create a .env.local file from the example
+cp .env.example .env.local
+# Edit .env.local with your actual configuration values
 ```
+
+### Environment Variables
+
+This project uses environment variables for configuration. Create a `.env.local` file based on the provided `.env.example` and fill in your values:
+
+- `NEXT_PUBLIC_AWS_REGION`: Your AWS region
+- `NEXT_PUBLIC_COGNITO_USER_POOL_ID`: Your Cognito User Pool ID
+- `NEXT_PUBLIC_COGNITO_APP_CLIENT_ID`: Your Cognito App Client ID
+- `NEXT_PUBLIC_API_BASE_URL`: Your API Gateway endpoint
+- `NEXT_PUBLIC_AUTH_API_URL`: Your authentication API endpoint
 
 ### Building for Production
 

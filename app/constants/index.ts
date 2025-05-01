@@ -1,8 +1,9 @@
 import { DashboardItem } from '../types';
 
 // API URLs
-export const API_BASE_URL = 'https://ofthddzjjh.execute-api.us-west-2.amazonaws.com/prod';
-export const AUTH_API_URL = 'https://r734rgw5dju6ibxoyx47totfgm0mtxeu.lambda-url.us-west-2.on.aws/';
+// NOTE: In a production environment, these values should be loaded from environment variables
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.example.com/prod';
+export const AUTH_API_URL = process.env.NEXT_PUBLIC_AUTH_API_URL || 'https://auth.example.com/';
 
 // API Endpoints
 export const API_ENDPOINTS = {
