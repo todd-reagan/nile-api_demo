@@ -3,7 +3,7 @@
   max-height: 600px;
   overflow-y: auto;
   padding-right: 8px;
-  background-color: #1f2937; /* Darker background for the tree container */
+  background-color: transparent; /* Transparent background to match parent */
   border-radius: 6px;
   padding: 8px;
 }
@@ -12,16 +12,20 @@
   padding: 4px 8px;
   border-radius: 4px;
   color: #ffffff; /* White text for maximum contrast */
-  background-color: #1f2937; /* Dark background */
+  background-color: #2563eb; /* Light blue background */
+  opacity: 0.6; /* Make it slightly transparent */
+  margin-bottom: 2px;
 }
 
 .treeContainer :global(.rct-tree-item-title-container:hover) {
-  background-color: #374151; /* Slightly lighter on hover */
+  background-color: #3b82f6; /* Slightly lighter blue on hover */
+  opacity: 0.8; /* Less transparent on hover */
 }
 
 .treeContainer :global(.rct-tree-item-title-container.rct-tree-item-title-container-selected) {
-  background-color: #3b82f6; /* Bright blue for selected items */
+  background-color: #1e40af; /* Darker blue for selected items */
   color: white; /* White text for selected items */
+  opacity: 1; /* Fully opaque when selected */
 }
 
 .treeContainer :global(.rct-tree-items-container) {
