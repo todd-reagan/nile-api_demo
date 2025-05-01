@@ -46,6 +46,7 @@ export interface ParsedSite {
 export interface Building {
   tenantid: string;
   siteid: string;
+  siteName?: string;
   bldgid: string;
   name: string;
   address: Address | string; // Can be string when it needs to be parsed
@@ -55,6 +56,7 @@ export interface Building {
 export interface ParsedBuilding {
   tenantid: string;
   siteid: string;
+  siteName?: string;
   bldgid: string;
   name: string;
   address: Address;

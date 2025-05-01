@@ -154,6 +154,8 @@ export default function SitesPage() {
             />
             
             <div className="mt-4 pt-4 border-t border-gray-600">
+              {/* Technical IDs */}
+              <h4 className="text-sm font-medium text-gray-400 mb-2">Technical Details</h4>
               <DataItem label="Tenant ID" value={site.tenantid} />
               <DataItem label="Site ID" value={site.siteid} />
             </div>
