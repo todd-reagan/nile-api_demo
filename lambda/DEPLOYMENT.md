@@ -77,16 +77,27 @@ After deploying the Lambda functions, you should verify that they are working co
 5. Click "Test" to execute the Lambda function
 6. Verify that the function returns the expected response
 
-### Enhanced Floor Data
+### Enhanced Location Data
 
-The `nileFloors.py` Lambda function has been enhanced to include site and building names in the floor data. This allows the frontend to display more user-friendly information instead of just IDs. The function now:
+Several Lambda functions have been enhanced to include location names in the data:
+
+#### Floor Data (`nileFloors.py`)
+The `nileFloors.py` Lambda function has been enhanced to include site and building names in the floor data. The function now:
 
 1. Loads site and building data from DynamoDB
 2. Caches the site and building names by ID
 3. Includes the site and building names in the floor data
 4. Returns the enhanced floor data to the frontend
 
-This enhancement improves the user experience by showing meaningful names instead of just IDs in the UI.
+#### Building Data (`nileBldg.py`)
+The `nileBldg.py` Lambda function has been enhanced to include site names in the building data. The function now:
+
+1. Loads site data from DynamoDB
+2. Caches the site names by ID
+3. Includes the site names in the building data
+4. Returns the enhanced building data to the frontend
+
+These enhancements improve the user experience by showing meaningful names instead of just IDs in the UI. Users can now see the names of sites and buildings associated with each floor, and the names of sites associated with each building, making it easier to understand the data.
 
 ## Troubleshooting
 
