@@ -8,6 +8,7 @@
 .treeContainer :global(.rct-tree-item-title-container) {
   padding: 4px 8px;
   border-radius: 4px;
+  color: #e5e7eb; /* Light gray text color for better contrast */
 }
 
 .treeContainer :global(.rct-tree-item-title-container:hover) {
@@ -16,6 +17,7 @@
 
 .treeContainer :global(.rct-tree-item-title-container.rct-tree-item-title-container-selected) {
   background-color: rgba(59, 130, 246, 0.5);
+  color: white; /* White text for selected items */
 }
 
 .treeContainer :global(.rct-tree-items-container) {
@@ -28,4 +30,14 @@
 
 .treeContainer :global(.rct-tree-item-button) {
   color: #e5e7eb;
+}
+
+/* Ensure text is visible */
+.treeContainer :global(.rct-tree-item-title) {
+  color: #e5e7eb;
+}
+
+/* SVG icons in the tree */
+.treeContainer svg {
+  color: #9ca3af;
 }
