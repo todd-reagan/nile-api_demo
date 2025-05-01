@@ -3,20 +3,24 @@
   max-height: 600px;
   overflow-y: auto;
   padding-right: 8px;
+  background-color: #1f2937; /* Darker background for the tree container */
+  border-radius: 6px;
+  padding: 8px;
 }
 
 .treeContainer :global(.rct-tree-item-title-container) {
   padding: 4px 8px;
   border-radius: 4px;
-  color: #e5e7eb; /* Light gray text color for better contrast */
+  color: #ffffff; /* White text for maximum contrast */
+  background-color: #1f2937; /* Dark background */
 }
 
 .treeContainer :global(.rct-tree-item-title-container:hover) {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: #374151; /* Slightly lighter on hover */
 }
 
 .treeContainer :global(.rct-tree-item-title-container.rct-tree-item-title-container-selected) {
-  background-color: rgba(59, 130, 246, 0.5);
+  background-color: #3b82f6; /* Bright blue for selected items */
   color: white; /* White text for selected items */
 }
 
@@ -25,19 +29,26 @@
 }
 
 .treeContainer :global(.rct-tree-item-arrow) {
-  color: #9ca3af;
+  color: #ffffff; /* White arrows for visibility */
 }
 
 .treeContainer :global(.rct-tree-item-button) {
-  color: #e5e7eb;
+  color: #ffffff; /* White buttons for visibility */
 }
 
 /* Ensure text is visible */
 .treeContainer :global(.rct-tree-item-title) {
-  color: #e5e7eb;
+  color: #ffffff; /* White text for maximum contrast */
+  font-weight: 500; /* Slightly bolder text */
 }
 
 /* SVG icons in the tree */
 .treeContainer svg {
-  color: #9ca3af;
+  color: #ffffff; /* White icons for visibility */
+}
+
+/* Add a subtle border to separate tree items */
+.treeContainer :global(.rct-tree-item) {
+  border-bottom: 1px solid #374151;
+  margin-bottom: 2px;
 }

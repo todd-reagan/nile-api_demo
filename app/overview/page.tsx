@@ -337,7 +337,7 @@ export default function OverviewPage() {
     <PageLayout title="Network Overview">
       <div className="flex flex-col md:flex-row bg-gray-900 rounded-lg overflow-hidden shadow-xl mb-8">
         {/* Tree View Panel */}
-        <div className="w-full md:w-1/3 lg:w-1/4 bg-gray-800 p-4 border-r border-gray-700">
+        <div className="w-full md:w-1/3 lg:w-1/4 bg-gray-900 p-4 border-r border-gray-700">
           <h2 className="text-xl font-semibold mb-4">Network Hierarchy</h2>
           
           {Object.keys(treeData).length > 0 && (
