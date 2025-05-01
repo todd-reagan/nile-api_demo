@@ -5,7 +5,7 @@
 mkdir -p deployment
 
 # Package each Lambda function
-for lambda_file in nileSites.py nileBldg.py nileFloors.py nileSegments.py nileTree.py; do
+for lambda_file in nileSites.py nileBldg.py nileFloors.py nileSegments.py nileTree.py tenantUpdate.py mabUpdate.py; do
   echo "Packaging $lambda_file..."
   
   # Create a temporary directory for this Lambda
@@ -13,9 +13,14 @@ for lambda_file in nileSites.py nileBldg.py nileFloors.py nileSegments.py nileTr
   temp_dir="deployment/temp_$lambda_name"
   mkdir -p $temp_dir
   
-  # Copy the Lambda function and utils.py to the temp directory
+  # Copy the Lambda function and utility files to the temp directory
   cp $lambda_file $temp_dir/
   cp utils.py $temp_dir/
+  
+  # Copy api_utils.py if the Lambda function is tenantUpdate.py or mabUpdate.py
+  if [[ "$lambda_file" == "tenantUpdate.py" || "$lambda_file" == "mabUpdate.py" ]]; then
+    cp api_utils.py $temp_dir/
+  fi
   
   # Create a zip file
   cd $temp_dir

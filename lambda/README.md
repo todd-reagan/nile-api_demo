@@ -14,13 +14,16 @@ The Lambda functions follow a standardized architecture:
 ## Files
 
 - `utils.py` - Common utilities and base classes for all Lambda functions
+- `api_utils.py` - Utilities for making API requests to external services
 - `nileTree.py` - Retrieves the complete tenant hierarchy (sites, buildings, floors)
 - `nileSites.py` - Retrieves site information
 - `nileBldg.py` - Retrieves building information
 - `nileFloors.py` - Retrieves floor information
 - `nileSegments.py` - Retrieves network segment information
-- `tenantUpdate.py` - Updates tenant data
-- `mabUpdate.py` - Updates MAC address binding data
+- `tenantUpdate.py` - Updates tenant data from the Nile API
+- `mabUpdate.py` - Retrieves client data from the Nile API
+- `package_lambdas.sh` - Script to package Lambda functions for deployment
+- `DEPLOYMENT.md` - Deployment guide for Lambda functions
 
 ## Data Model
 
