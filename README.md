@@ -1,4 +1,4 @@
-# Nile Mobile Dashboard
+# Nile API Demo
 
 A Next.js application for network management and monitoring.
 
