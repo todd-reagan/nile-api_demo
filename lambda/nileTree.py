@@ -1,34 +1,28 @@
+"""
+Lambda function to retrieve tenant hierarchy information from DynamoDB.
+"""
+
+from typing import Dict, Any, List, Optional
 import json
-import os
-import boto3
-from boto3.dynamodb.conditions import Key
 
-class nileTree:
-    """
-    Class to update the API token and prepare the connection to AWS DynamoDB.
-    """
+from utils import NileBaseHandler, standard_lambda_handler
 
-    def __init__(self, api_key=None, tenant_id=None):
-        """
-        Initialize the nileTree class.
-        
-        :param api_key: The API key to use for authentication
-        :param tenant_id: The tenant ID to use for querying data
-        """
-        # Initialize AWS resources
-        dynamodb = boto3.resource('dynamodb')
-        self.table = dynamodb.Table('tenant')
-        
-        # Store API key and tenant ID
-        self.api_key = api_key
-        self.tenant_id = tenant_id
 
-    def transform_hierarchy(self, raw_data):
+class NileTreeHandler(NileBaseHandler):
+    """Handler for tenant hierarchy operations."""
+
+    def transform_hierarchy(self, raw_data: List[List[Dict[str, Any]]]) -> Dict[str, Any]:
         """
         Transform the raw data into a hierarchical structure.
         
-        :param raw_data: A list of lists containing sites, buildings, and floors
-        :return: A hierarchical structure of the tenant's data
+        Args:
+            raw_data: A list of lists containing sites, buildings, and floors
+            
+        Returns:
+            A hierarchical structure of the tenant's data
+            
+        Raises:
+            Exception: If there's an error transforming the hierarchy
         """
         try:
             tenant_structure = {}
@@ -117,20 +111,17 @@ class nileTree:
             print(f"Error in transform_hierarchy: {e}")
             # Return a minimal structure if there's an error
             return {"tenantid": self.tenant_id, "sites": [], "error": str(e)}
- 
 
-    def get_buildings(self):
+    def get_buildings(self) -> Dict[str, Any]:
         """
-        Get a list of tenant site names from DynamoDB.
+        Get a hierarchical view of tenant sites, buildings, and floors from DynamoDB.
 
-        :return: A list of site names.
-        """
-        # Use the tenant ID from the x-tenant-id header
-        if not self.tenant_id:
-            raise Exception("Tenant ID is required. Please provide it in the x-tenant-id header.")
+        Returns:
+            A hierarchical structure of the tenant's data
             
-        partition_key_value = self.tenant_id
-        
+        Raises:
+            Exception: If no data exists or if there's an error retrieving it
+        """
         # Initialize variables to empty lists in case any of the queries fail
         sites = []
         buildings = []
@@ -139,13 +130,10 @@ class nileTree:
         
         # Get sites
         try:
-            prefix = "S#"
-            key_condition = Key('pk').eq(partition_key_value) & Key('sk').begins_with(prefix)
-            response = self.table.query(KeyConditionExpression=key_condition)
+            sites_result = self.query_items("S#")
             
-            result = response['Items']
-            if result:  # Only process if we have results
-                for site in result:
+            if sites_result:  # Only process if we have results
+                for site in sites_result:
                     data = {
                         "tenantid": site['pk'],
                         "siteid": site['sk'].split('#')[1],
@@ -159,13 +147,10 @@ class nileTree:
         
         # Get buildings
         try:
-            prefix = "B#"
-            key_condition = Key('pk').eq(partition_key_value) & Key('sk').begins_with(prefix)
-            response = self.table.query(KeyConditionExpression=key_condition)
+            bldgs_result = self.query_items("B#")
             
-            result = response['Items']
-            if result:  # Only process if we have results
-                for bldg in result:
+            if bldgs_result:  # Only process if we have results
+                for bldg in bldgs_result:
                     data = {
                         "tenantid": bldg['pk'],
                         "siteid": bldg['sk'].split('#')[1],
@@ -180,13 +165,10 @@ class nileTree:
         
         # Get floors
         try:
-            prefix = "F#"
-            key_condition = Key('pk').eq(partition_key_value) & Key('sk').begins_with(prefix)
-            response = self.table.query(KeyConditionExpression=key_condition)
+            floors_result = self.query_items("F#")
             
-            result = response['Items']
-            if result:  # Only process if we have results
-                for floor in result:
+            if floors_result:  # Only process if we have results
+                for floor in floors_result:
                     data = {
                         "tenantid": floor['pk'],
                         "siteid": floor['sk'].split('#')[1],
@@ -202,13 +184,10 @@ class nileTree:
         
         # Get segments
         try:
-            prefix = "SEG#"
-            key_condition = Key('pk').eq(partition_key_value) & Key('sk').begins_with(prefix)
-            response = self.table.query(KeyConditionExpression=key_condition)
+            segments_result = self.query_items("SEG#")
             
-            result = response['Items']
-            if result:  # Only process if we have results
-                for seg in result:
+            if segments_result:  # Only process if we have results
+                for seg in segments_result:
                     data = {
                         "tenantid": seg['pk'],
                         "segment": seg['name']
@@ -225,101 +204,21 @@ class nileTree:
         raw_data = [sites, buildings, floors]
         
         try:
-            tenanttree = self.transform_hierarchy(raw_data)
-            return tenanttree
+            tenant_tree = self.transform_hierarchy(raw_data)
+            return tenant_tree
         except Exception as err:
             raise Exception(f"Error transforming hierarchy: {err}") from err
 
 
-def lambda_handler(event, context):
+def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     """
     AWS Lambda handler function.
     
-    :param event: The event containing the API key and tenant ID
-    :param context: The Lambda context
-    :return: The API response
+    Args:
+        event: The Lambda event
+        context: The Lambda context
+        
+    Returns:
+        API Gateway response
     """
-    # Set up logging
-    import logging
-    import os
-    logger = logging.getLogger()
-    
-    # Set log level based on DEBUG environment variable
-    debug_mode = os.environ.get("DEBUG", "false").lower() == "true"
-    if debug_mode:
-        logger.setLevel(logging.INFO)
-    else:
-        logger.setLevel(logging.WARNING)
-    
-    # Log the entire event for debugging
-    logger.info(f"Received event: {json.dumps(event, default=str)}")
-    logger.info(f"Context: {context}")
-    # Define CORS headers
-    cors_headers = {
-        'Content-Type': "application/json",
-        'Access-Control-Allow-Origin': '*',  # Enable CORS
-        'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,x-api-key,x-tenant-id',
-        'Access-Control-Allow-Methods': 'GET,OPTIONS'
-    }
-    
-    # Check if this is a preflight request (OPTIONS)
-    if event.get('requestContext', {}).get('http', {}).get('method') == 'OPTIONS' or \
-       event.get('httpMethod') == 'OPTIONS':
-        print("Handling preflight request")
-        return {
-            'statusCode': 200,
-            'headers': cors_headers,
-            'body': json.dumps({'message': 'CORS preflight request successful'})
-        }
-    
-    # Extract API key and tenant ID from the event
-    api_key = None
-    tenant_id = None
-    
-    # Check if the event contains the headers
-    if 'headers' in event:
-        # Extract API key from x-api-key header
-        if 'x-api-key' in event['headers']:
-            api_key = event['headers']['x-api-key']
-        # Fall back to Authorization header if x-api-key is not present
-        elif 'Authorization' in event['headers']:
-            auth_header = event['headers']['Authorization']
-            if auth_header.startswith('Bearer '):
-                api_key = auth_header[7:]  # Remove 'Bearer ' prefix
-        
-        # Extract tenant ID from x-tenant-id header
-        if 'x-tenant-id' in event['headers']:
-            tenant_id = event['headers']['x-tenant-id']
-    
-    # Check if the event contains the queryStringParameters
-    if 'queryStringParameters' in event and event['queryStringParameters']:
-        # Extract tenant ID from query parameters if not found in headers
-        if not tenant_id and 'tenantId' in event['queryStringParameters']:
-            tenant_id = event['queryStringParameters']['tenantId']
-    
-    # Initialize the nileTree class with the API key and tenant ID
-    tree = nileTree(api_key=api_key, tenant_id=tenant_id)
-
-    try:
-        trees = tree.get_buildings()
-
-        return {
-            'statusCode': 200,
-            'headers': cors_headers,
-            'body': json.dumps(trees)
-        }
-
-    except Exception as e:
-        error_details = {
-            'error': str(e),
-            'tenant_id': tenant_id,
-            'api_key_present': api_key is not None,
-            'event_headers': event.get('headers', {}),
-            'event_query_params': event.get('queryStringParameters', {})
-        }
-        
-        return {
-            'statusCode': 500,
-            'headers': cors_headers,
-            'body': json.dumps(error_details)
-        }
+    return standard_lambda_handler(event, context, NileTreeHandler, 'get_buildings')
