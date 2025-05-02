@@ -188,19 +188,9 @@ export default function SegmentsPage() {
                       </div>
                     )}
                     
-                    <div className="mt-3 pt-3 border-t border-gray-600 flex justify-between items-center">
-                      <div className="text-xs text-gray-400">
-                        {segment.encrypted ? 
-                          <span className="bg-green-900/30 text-green-400 px-2 py-0.5 rounded">Encrypted</span> : 
-                          <span className="bg-red-900/30 text-red-400 px-2 py-0.5 rounded">Unencrypted</span>
-                        }
-                      </div>
-                      <Link
-                        href={`/segments.html?id=${segment.id || segment.segment}`}
-                        className="text-xs bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded text-white"
-                      >
-                        View Details
-                      </Link>
+                    {/* Footer space if needed */}
+                    <div className="mt-3 pt-3 border-t border-gray-600">
+                      {/* Empty footer for consistent spacing */}
                     </div>
                   </Card>
                 ))}
