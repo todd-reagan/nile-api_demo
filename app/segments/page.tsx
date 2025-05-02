@@ -188,9 +188,13 @@ export default function SegmentsPage() {
                       </div>
                     )}
                     
-                    {/* Footer space if needed */}
-                    <div className="mt-3 pt-3 border-t border-gray-600">
-                      {/* Empty footer for consistent spacing */}
+                    <div className="mt-3 pt-3 border-t border-gray-600 flex justify-end">
+                      <Link
+                        href={`/segments.html?id=${segment.id || segment.segment}`}
+                        className="text-xs bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded text-white font-medium"
+                      >
+                        View Details
+                      </Link>
                     </div>
                   </Card>
                 ))}
