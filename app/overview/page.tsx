@@ -171,10 +171,9 @@ export default function OverviewPage() {
       case 'tenant':
         return (
           <div className="p-6">
-            <h2 className="text-2xl font-bold mb-4">Tenant Overview</h2>
             <Card title="Tenant Information">
               <DataItem label="Tenant ID" value={selectedItem.data.tenantid} />
-              <DataItem label="Sites" value={`${selectedItem.data.sites.length} sites`} />
+              <DataItem label="Sites" value={`${selectedItem.data.sites.length}`} />
               <div className="mt-4 pt-4 border-t border-gray-600">
                 <p className="text-gray-300">
                   This tenant has {selectedItem.data.sites.length} sites. 
@@ -317,7 +316,7 @@ export default function OverviewPage() {
   };
 
   if (loading) {
-    return <LoadingState message="Loading network overview..." />;
+    return <LoadingState message="Loading tenant overview..." />;
   }
 
   if (error) {
@@ -329,11 +328,11 @@ export default function OverviewPage() {
   }
 
   return (
-    <PageLayout title="Network Overview">
+    <PageLayout title="Tenant Overview">
       <div className="flex flex-col md:flex-row bg-gray-900 rounded-lg overflow-hidden shadow-xl mb-8">
         {/* Tree View Panel */}
         <div className="w-full md:w-1/3 lg:w-1/4 bg-gray-900 p-4 border-r border-gray-700">
-          <h2 className="text-xl font-semibold mb-4">Network Hierarchy</h2>
+          <h2 className="text-xl font-semibold mb-4">Sites</h2>
           
           {Object.keys(treeData).length > 0 && (
             <div className={styles.treeContainer}>
