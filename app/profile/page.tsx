@@ -108,8 +108,8 @@ export default function ProfilePage() {
   const handleAddApiKey = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!apiKeyName || !apiKeyValue || !apiKeyService) {
-      setApiKeyError('Please fill in all API key fields');
+    if (!apiKeyName || !apiKeyValue || !apiKeyService || !apiKeyTenantId) {
+      setApiKeyError('Please fill in all API key fields, including Tenant ID');
       return;
     }
     
@@ -150,8 +150,8 @@ export default function ProfilePage() {
   const handleEditApiKey = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!editingApiKey || !apiKeyName || !apiKeyValue || !apiKeyService) {
-      setApiKeyError('Please fill in all API key fields');
+    if (!editingApiKey || !apiKeyName || !apiKeyValue || !apiKeyService || !apiKeyTenantId) {
+      setApiKeyError('Please fill in all API key fields, including Tenant ID');
       return;
     }
     
@@ -267,16 +267,24 @@ export default function ProfilePage() {
           
           // Populate form fields with JSON data
           setApiKeyName(jsonData.name || '');
-          setApiKeyValue(jsonData.key || jsonData.apiKey || jsonData.token || jsonData.value || '');
-          setApiKeyService(jsonData.service || '');
+          // Use api_token as the primary key field
+          setApiKeyValue(jsonData.api_token || jsonData.key || jsonData.apiKey || jsonData.token || jsonData.value || '');
+          // Always set service to "Nile API" for drag and drop
+          setApiKeyService('Nile API');
           setApiKeyUrl(jsonData.url || jsonData.endpoint || '');
-          setApiKeyValidBefore(jsonData.validBefore || jsonData.expiry || jsonData.expiryDate || '');
+          // Use validBeforeTime as the primary valid before field
+          setApiKeyValidBefore(jsonData.validBeforeTime || jsonData.validBefore || jsonData.expiry || jsonData.expiryDate || '');
           setApiKeyTenantId(jsonData.tenantId || jsonData.tenant || '');
           
-          setDragMessage('JSON file parsed successfully!');
-          setTimeout(() => {
-            setDragMessage('Drag and drop a JSON file here');
-          }, 3000);
+          // Check if any required fields are missing
+          if (!jsonData.name || !jsonData.api_token || !jsonData.tenantId) {
+            setApiKeyError('The JSON file is missing required fields. Please ensure it contains name, api_token, and tenantId.');
+          } else {
+            setDragMessage('JSON file parsed successfully!');
+            setTimeout(() => {
+              setDragMessage('Drag and drop a JSON file here');
+            }, 3000);
+          }
         } catch (err) {
           console.error('Error parsing JSON:', err);
           setApiKeyError('Invalid JSON file');
@@ -572,7 +580,7 @@ export default function ProfilePage() {
                   {/* API Key Tenant ID */}
                   <div>
                     <label htmlFor="apiKeyTenantId" className="block text-sm font-medium text-gray-300">
-                      Tenant ID
+                      Tenant ID <span className="text-red-400">*</span>
                     </label>
                     <input
                       id="apiKeyTenantId"
@@ -580,7 +588,8 @@ export default function ProfilePage() {
                       value={apiKeyTenantId}
                       onChange={(e) => setApiKeyTenantId(e.target.value)}
                       className="mt-1 block w-full rounded-md bg-gray-600 border-gray-500 text-white focus:border-blue-500 focus:ring-blue-500"
-                      placeholder="Enter tenant identifier (optional)"
+                      placeholder="Enter tenant identifier"
+                      required
                     />
                   </div>
 
