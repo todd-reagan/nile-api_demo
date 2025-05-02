@@ -4,18 +4,31 @@
 import Link from 'next/link';
 import { useState, useEffect, useCallback } from 'react';
 import { useFetch } from '../hooks';
-import { fetchSegments } from '../services/api';
-import { Segment } from '../types';
+import { fetchSegments, fetchSites } from '../services/api';
+import { Segment, Site } from '../types';
 import { PageLayout, LoadingState, ErrorState, Card, DataItem } from '../components/ui';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function SegmentsPage() {
   const { data: segments, loading, error } = useFetch<Segment[]>(fetchSegments);
+  const { data: sites, loading: sitesLoading } = useFetch<Site[]>(fetchSites);
   const { apiKeys } = useAuth();
   const [rawSegmentsData, setRawSegmentsData] = useState<any>(null);
   const [rawDataLoading, setRawDataLoading] = useState<boolean>(false);
   const [rawDataError, setRawDataError] = useState<string | null>(null);
   const [expandedSegments, setExpandedSegments] = useState<Record<string, boolean>>({});
+  const [siteMap, setSiteMap] = useState<Record<string, string>>({});
+  
+  // Create a map of site IDs to site names
+  useEffect(() => {
+    if (sites) {
+      const map: Record<string, string> = {};
+      sites.forEach(site => {
+        map[site.siteid] = site.name;
+      });
+      setSiteMap(map);
+    }
+  }, [sites]);
   
   // Toggle expanded state for a segment
   const toggleSegmentExpanded = useCallback((segmentId: string) => {
@@ -123,8 +136,8 @@ export default function SegmentsPage() {
     }
   }, [apiKeys]);
 
-  if (loading) {
-    return <LoadingState message="Loading segments..." />;
+  if (loading || sitesLoading) {
+    return <LoadingState message="Loading data..." />;
   }
 
   if (error) {
@@ -190,7 +203,14 @@ export default function SegmentsPage() {
                               <div className="text-xs text-gray-300">
                                 {segment.linkedSettings.siteSettings.map((setting, index) => (
                                   <div key={index} className="bg-gray-800 px-2 py-1 rounded mb-1">
-                                    <span className="font-medium">{setting.type}</span>
+                                    <div className="flex justify-between items-center">
+                                      <span className="font-medium">{setting.type}</span>
+                                      {setting.location && (
+                                        <span className="text-xs bg-blue-900/50 px-2 py-0.5 rounded">
+                                          {siteMap[setting.location] || setting.location}
+                                        </span>
+                                      )}
+                                    </div>
                                     {setting.extra && Array.isArray(setting.extra) && (
                                       <div className="mt-1 pl-2 border-l border-gray-700">
                                         {setting.extra.map((item, i) => (
