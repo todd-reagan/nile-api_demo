@@ -1,136 +1,14 @@
 # Nile API Demo
 
-A Next.js application for network management and monitoring.
+A Next.js application for demonstration of Nile Public APIs.
 
-## Project Structure
+These are just some ideas on how the APIs could be used, always excited to see what Nile partners and customers build!
 
-The project has been organized with a focus on maintainability, reusability, and performance:
-
-```
-app/
-├── components/
-│   ├── TreeView.tsx
-│   ├── auth/
-│   │   └── ProtectedRoute.tsx
-│   └── ui/
-│       ├── Card.tsx
-│       ├── DataItem.tsx
-│       ├── ErrorDisplay.tsx
-│       ├── ErrorState.tsx
-│       ├── LoadingSpinner.tsx
-│       ├── LoadingState.tsx
-│       ├── Navigation.tsx
-│       ├── PageLayout.tsx
-│       ├── ReturnToDashboard.tsx
-│       ├── ReturnToDevices.tsx
-│       └── index.ts
-├── config/
-│   └── cognito.ts
-├── constants/
-│   └── index.ts
-├── contexts/
-│   └── AuthContext.tsx
-├── hooks/
-│   ├── useFetch.ts
-│   ├── useForm.ts
-│   └── index.ts
-├── services/
-│   ├── api.ts
-│   ├── auth.ts
-│   └── apiKeyApi.ts
-├── types/
-│   └── index.ts
-├── utils/
-│   └── dataTransformers.ts
-├── bldg/
-│   └── page.tsx
-├── clients/
-│   └── page.tsx
-├── devices/
-│   └── page.tsx
-├── floor/
-│   └── page.tsx
-├── login/
-│   └── page.tsx
-├── macauth/
-│   └── page.tsx
-├── overview/
-│   └── page.tsx
-├── port-viewer/
-│   └── page.tsx
-├── profile/
-│   └── page.tsx
-├── segments/
-│   └── page.tsx
-├── signup/
-│   └── page.tsx
-├── sites/
-│   └── page.tsx
-├── update/
-│   └── page.tsx
-├── favicon.ico
-├── globals.css
-├── layout.tsx
-└── page.tsx
-```
-
-## Features
-
-- Dashboard with links to different sections
-- Overview of tenant hierarchy
-- Site information management
-- Building information management
-- Floor information management
-- Network segments management
-- Client information with device details
-- Device approval and authentication
-- Port viewer for switch port connectivity
-- Database update functionality
-- Raw API data views for debugging and development
-
-## Recent Improvements
-
-### API Data Visualization
-
-- Added raw JSON views to key pages (Sites, Buildings, Floors, Segments) for direct API response inspection
-- Created a new Client Information page that displays client device data in a card-based format
-- Implemented robust retry logic with variable backoff for API calls to handle 401 errors
-- Added copy-to-clipboard functionality for all raw JSON data
 
 ### Port Viewer
 
-- Added a visual port viewer for switch port connectivity
-- Implemented port coloring based on network segment assignments
-- Added responsive design for different screen sizes
+- Integration/adaptation of [Todd Ellison's Project](https://github.com/ToddEllison/NilePortDemo)
 
-### Code Organization
-
-- Created a shared `/types` directory for interface definitions
-- Implemented reusable UI components in `/components/ui`
-- Centralized API calls in a service layer
-- Added utility functions for data transformation
-- Created custom hooks for data fetching and form handling
-- Extracted constants to a dedicated file
-
-### UI Components
-
-- `LoadingSpinner`: Consistent loading indicator
-- `ErrorDisplay`: Standardized error messaging
-- `PageLayout`: Consistent page structure
-- `ReturnToDashboard`: Navigation component
-- `LoadingState`: Full-page loading state
-- `ErrorState`: Full-page error state
-- `Card`: Reusable card component for displaying information
-- `DataItem`: Component for displaying key-value pairs
-
-### Custom Hooks
-
-- `useFetch`: Simplifies data fetching with loading and error states
-- `useForm`: Handles form state management
-
-### Utilities
-
-- `dataTransformers.ts`: Functions for parsing and formatting data
 
 ## Getting Started
 
