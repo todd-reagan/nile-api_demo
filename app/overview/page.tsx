@@ -199,8 +199,7 @@ export default function OverviewPage() {
               </Link>
             </div>
             
-            <Card title="Address Information" className="mb-4">
-              <h3 className="text-lg font-semibold mb-2">Address</h3>
+            <Card title="Address" className="mb-4">
               <DataItem label="Street" value={site.address.street1} />
               {site.address.street2 && (
                 <DataItem label="Street 2" value={site.address.street2} />
@@ -213,7 +212,6 @@ export default function OverviewPage() {
             </Card>
             
             <Card title="Buildings">
-              <h3 className="text-lg font-semibold mb-2">Buildings</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {site.buildings.map(building => (
                   <Link
@@ -247,8 +245,7 @@ export default function OverviewPage() {
               </Link>
             </div>
             
-            <Card title="Location Information" className="mb-4">
-              <h3 className="text-lg font-semibold mb-2">Location</h3>
+            <Card title="Location" className="mb-4">
               <DataItem label="Site" value={building.site.name} />
               <DataItem label="Address" value={building.address.street1} />
               {building.address.street2 && (
@@ -263,7 +260,6 @@ export default function OverviewPage() {
             </Card>
             
             <Card title="Floors">
-              <h3 className="text-lg font-semibold mb-2">Floors</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
                 {building.floors.map(floor => (
                   <Link
@@ -300,8 +296,7 @@ export default function OverviewPage() {
               </Link>
             </div>
             
-            <Card title="Floor Information">
-              <h3 className="text-lg font-semibold mb-2">Details</h3>
+            <Card title="Floor Details">
               <DataItem label="Floor Number" value={floor.number} />
               <DataItem label="Building" value={floor.building.name} />
               <DataItem label="Site" value={floor.site.name} />
@@ -405,19 +400,16 @@ export default function OverviewPage() {
       {/* Quick Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <Card title="Sites" className="bg-blue-900/30 border border-blue-800">
-          <h3 className="text-lg font-semibold mb-2">Sites</h3>
           <p className="text-3xl font-bold">{tenant.sites.length}</p>
         </Card>
         
         <Card title="Buildings" className="bg-green-900/30 border border-green-800">
-          <h3 className="text-lg font-semibold mb-2">Buildings</h3>
           <p className="text-3xl font-bold">
             {tenant.sites.reduce((total, site) => total + site.buildings.length, 0)}
           </p>
         </Card>
         
         <Card title="Floors" className="bg-purple-900/30 border border-purple-800">
-          <h3 className="text-lg font-semibold mb-2">Floors</h3>
           <p className="text-3xl font-bold">
             {tenant.sites.reduce((total, site) => 
               total + site.buildings.reduce((bTotal, building) => 
@@ -425,8 +417,7 @@ export default function OverviewPage() {
           </p>
         </Card>
         
-        <Card title="Tenant Information" className="bg-orange-900/30 border border-orange-800">
-          <h3 className="text-lg font-semibold mb-2">Tenant ID</h3>
+        <Card title="Tenant ID" className="bg-orange-900/30 border border-orange-800">
           <p className="text-sm font-mono truncate">{tenant.tenantid}</p>
         </Card>
       </div>
