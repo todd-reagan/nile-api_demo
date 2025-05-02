@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, DragEvent } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { PageLayout, ErrorDisplay, LoadingState } from '../components/ui';
 import { ApiKey } from '../services/auth';
@@ -36,6 +36,11 @@ export default function ProfilePage() {
   const [apiKeyError, setApiKeyError] = useState<string | null>(null);
   const [editingApiKey, setEditingApiKey] = useState<ApiKey | null>(null);
   const [isEditingApiKey, setIsEditingApiKey] = useState(false);
+  
+  // Drag and drop state
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragMessage, setDragMessage] = useState('Drag and drop a JSON file here');
+  const dropZoneRef = useRef<HTMLDivElement>(null);
 
   // Set initial values from user attributes
   useEffect(() => {
@@ -218,6 +223,69 @@ export default function ProfilePage() {
     setShowAddApiKey(false);
     setApiKeyError(null);
   };
+  
+  // Handle drag events
+  const handleDragEnter = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+    setDragMessage('Drop to upload');
+  };
+  
+  const handleDragLeave = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    setDragMessage('Drag and drop a JSON file here');
+  };
+  
+  const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+  
+  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    setDragMessage('Drag and drop a JSON file here');
+    
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const file = e.dataTransfer.files[0];
+      
+      // Check if file is JSON
+      if (file.type !== 'application/json' && !file.name.endsWith('.json')) {
+        setApiKeyError('Please upload a JSON file');
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const jsonData = JSON.parse(event.target?.result as string);
+          
+          // Populate form fields with JSON data
+          setApiKeyName(jsonData.name || '');
+          setApiKeyValue(jsonData.key || jsonData.apiKey || jsonData.token || jsonData.value || '');
+          setApiKeyService(jsonData.service || '');
+          setApiKeyUrl(jsonData.url || jsonData.endpoint || '');
+          setApiKeyValidBefore(jsonData.validBefore || jsonData.expiry || jsonData.expiryDate || '');
+          setApiKeyTenantId(jsonData.tenantId || jsonData.tenant || '');
+          
+          setDragMessage('JSON file parsed successfully!');
+          setTimeout(() => {
+            setDragMessage('Drag and drop a JSON file here');
+          }, 3000);
+        } catch (err) {
+          console.error('Error parsing JSON:', err);
+          setApiKeyError('Invalid JSON file');
+        }
+      };
+      
+      reader.readAsText(file);
+    }
+  };
 
   // Render profile content
   const renderProfileContent = () => {
@@ -382,6 +450,41 @@ export default function ProfilePage() {
                 <h3 className="text-lg font-medium mb-3">
                   {editingApiKey ? 'Edit API Key' : 'Add New API Key'}
                 </h3>
+                
+                {/* Drag and Drop Zone */}
+                <div
+                  ref={dropZoneRef}
+                  onDragEnter={handleDragEnter}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  className={`border-2 border-dashed rounded-lg p-6 mb-4 text-center transition-colors duration-200 ${
+                    isDragging ? 'border-blue-500 bg-blue-900/20' : 'border-gray-600 hover:border-gray-500'
+                  }`}
+                >
+                  <div className="flex flex-col items-center justify-center">
+                    <svg 
+                      className={`w-10 h-10 mb-3 ${isDragging ? 'text-blue-400' : 'text-gray-400'}`} 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24" 
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round" 
+                        strokeWidth={1.5} 
+                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                      />
+                    </svg>
+                    <p className={`mb-2 text-sm ${isDragging ? 'text-blue-300' : 'text-gray-400'}`}>
+                      {dragMessage}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      JSON files only
+                    </p>
+                  </div>
+                </div>
                 <form onSubmit={editingApiKey ? handleEditApiKey : handleAddApiKey} className="space-y-4">
                   {/* API Key Name */}
                   <div>
