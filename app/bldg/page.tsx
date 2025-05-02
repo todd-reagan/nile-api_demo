@@ -136,7 +136,6 @@ export default function BuildingPage() {
           <Card 
             key={building.bldgid} 
             title={building.name}
-            href={`/bldg/${building.bldgid}`}
           >
             <DataItem label="Address" value={building.address.street1} />
             {building.address.street2 && (

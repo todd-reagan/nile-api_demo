@@ -136,7 +136,6 @@ export default function SitesPage() {
           <Card 
             key={site.siteid} 
             title={site.name}
-            href={`/sites/${site.siteid}`}
           >
             <DataItem label="Address" value={site.address.street1} />
             {site.address.street2 && (
