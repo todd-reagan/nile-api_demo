@@ -18,15 +18,29 @@ export default function SegmentsPage() {
   const [rawDataError, setRawDataError] = useState<string | null>(null);
   const [expandedSegments, setExpandedSegments] = useState<Record<string, boolean>>({});
   const [siteMap, setSiteMap] = useState<Record<string, string>>({});
+  const [siteColorMap, setSiteColorMap] = useState<Record<string, string>>({});
   
-  // Create a map of site IDs to site names
+  // Create a map of site IDs to site names and generate colors
   useEffect(() => {
     if (sites) {
       const map: Record<string, string> = {};
-      sites.forEach(site => {
+      const colorMap: Record<string, string> = {};
+      
+      // Define a set of distinct colors for sites
+      const colors = [
+        'bg-blue-900/50', 'bg-green-900/50', 'bg-purple-900/50', 
+        'bg-red-900/50', 'bg-yellow-900/50', 'bg-indigo-900/50',
+        'bg-pink-900/50', 'bg-teal-900/50', 'bg-orange-900/50'
+      ];
+      
+      sites.forEach((site, index) => {
         map[site.siteid] = site.name;
+        // Assign a color from the colors array, cycling through if needed
+        colorMap[site.siteid] = colors[index % colors.length];
       });
+      
       setSiteMap(map);
+      setSiteColorMap(colorMap);
     }
   }, [sites]);
   
@@ -197,28 +211,32 @@ export default function SegmentsPage() {
                             </div>
                           )}
                           
-                          {segment.linkedSettings?.siteSettings && segment.linkedSettings.siteSettings.length > 0 && (
+                          {/* Only show site settings if there are any with extra data */}
+                          {segment.linkedSettings?.siteSettings && 
+                           segment.linkedSettings.siteSettings.some(setting => setting.extra && Array.isArray(setting.extra) && setting.extra.length > 0) && (
                             <div className="mt-3">
                               <h4 className="text-sm font-medium text-gray-400 mb-1">Site Settings</h4>
                               <div className="text-xs text-gray-300">
-                                {segment.linkedSettings.siteSettings.map((setting, index) => (
-                                  <div key={index} className="bg-gray-800 px-2 py-1 rounded mb-1">
-                                    <div className="flex justify-between items-center">
-                                      <span className="font-medium">{setting.type}</span>
+                                {segment.linkedSettings.siteSettings
+                                  .filter(setting => setting.extra && Array.isArray(setting.extra) && setting.extra.length > 0)
+                                  .map((setting, index) => (
+                                    <div key={index} className="bg-gray-800 px-2 py-1 rounded mb-1">
                                       {setting.location && (
-                                        <span className="text-xs bg-blue-900/50 px-2 py-0.5 rounded">
-                                          {siteMap[setting.location] || setting.location}
-                                        </span>
+                                        <div className="mb-1">
+                                          <span className={`text-xs ${siteColorMap[setting.location] || 'bg-blue-900/50'} px-2 py-0.5 rounded inline-block mb-1`}>
+                                            {siteMap[setting.location] || setting.location}
+                                          </span>
+                                          <span className="font-medium ml-2">{setting.type}</span>
+                                        </div>
+                                      )}
+                                      {setting.extra && Array.isArray(setting.extra) && (
+                                        <div className="pl-2 border-l border-gray-700">
+                                          {setting.extra.map((item, i) => (
+                                            <div key={i} className="text-gray-400">{item}</div>
+                                          ))}
+                                        </div>
                                       )}
                                     </div>
-                                    {setting.extra && Array.isArray(setting.extra) && (
-                                      <div className="mt-1 pl-2 border-l border-gray-700">
-                                        {setting.extra.map((item, i) => (
-                                          <div key={i} className="text-gray-400">{item}</div>
-                                        ))}
-                                      </div>
-                                    )}
-                                  </div>
                                 ))}
                               </div>
                             </div>
