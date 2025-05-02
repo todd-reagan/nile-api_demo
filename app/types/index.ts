@@ -75,10 +75,50 @@ export interface Floor {
   number: string;
 }
 
-// Segment interface
+// Segment interfaces
+export interface SegmentDetails {
+  name: string;
+  urls: string[];
+  popTunnelEnabled: boolean;
+  wiredSelfRegisterEnabled: boolean;
+  wiredSsoEnabled: boolean;
+  wiredGuestEnabled: boolean;
+}
+
+export interface SegmentGeoScope {
+  siteIds: string[];
+  buildingIds: string[];
+  zoneIds: string[];
+  globalInfo: any[];
+}
+
+export interface SegmentSetting {
+  type: string;
+  id: string;
+  location: string;
+  extra?: any; // Can be null, array, or object
+}
+
+export interface SegmentLinkedSettings {
+  globalSettings: any[];
+  siteSettings: SegmentSetting[];
+  buildingSettings: any[];
+  zoneSettings: any[];
+}
+
 export interface Segment {
   tenantid: string;
   segment: string;
+  id?: string;
+  name?: string;
+  encrypted?: boolean;
+  version?: string;
+  useTags?: boolean;
+  settingStatus?: string;
+  tagIds?: string[];
+  segmentDetails?: SegmentDetails;
+  geoScope?: SegmentGeoScope;
+  linkedSettings?: SegmentLinkedSettings;
 }
 
 // Network device interface

@@ -12,7 +12,7 @@ class NileSegmentHandler(NileBaseHandler):
 
     def get_segments(self) -> List[Dict[str, Any]]:
         """
-        Get a list of tenant network segments from DynamoDB.
+        Get a list of tenant network segments from DynamoDB with enhanced details.
 
         Returns:
             List of segment objects with their details.
@@ -29,10 +29,31 @@ class NileSegmentHandler(NileBaseHandler):
         # Transform the raw DynamoDB items into a more usable format
         segments = []
         for seg in result:
+            # Create base data object
             data = {
                 "tenantid": seg['pk'],
-                "segment": seg['name']
+                "segment": seg['name'],
+                "id": seg.get('id', ''),
+                "name": seg.get('name', ''),
+                "encrypted": seg.get('encrypted', False),
+                "version": seg.get('version', ''),
+                "useTags": seg.get('useTags', False),
+                "settingStatus": seg.get('settingStatus', ''),
+                "tagIds": seg.get('tagIds', [])
             }
+            
+            # Add segment details if available
+            if 'segmentDetails' in seg:
+                data['segmentDetails'] = seg['segmentDetails']
+            
+            # Add geo scope if available
+            if 'geoScope' in seg:
+                data['geoScope'] = seg['geoScope']
+            
+            # Add linked settings if available
+            if 'linkedSettings' in seg:
+                data['linkedSettings'] = seg['linkedSettings']
+            
             segments.append(data)
             
         return segments

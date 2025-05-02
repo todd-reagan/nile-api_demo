@@ -150,13 +150,59 @@ export default function SegmentsPage() {
               <h3 className="text-lg font-medium mb-2">Segments</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
                 {tenantSegments.map((segment) => (
-                  <Link
+                  <Card
                     key={segment.segment}
-                    href={`/segments.html?id=${segment.segment}`}
-                    className="bg-gray-700 rounded p-4 hover:bg-gray-600 transition-colors duration-200"
+                    title={segment.segment}
+                    className="bg-gray-700 hover:bg-gray-600 transition-colors duration-200"
                   >
-                    <p className="font-medium text-lg">{segment.segment}</p>
-                  </Link>
+                    {segment.segmentDetails?.urls && segment.segmentDetails.urls.length > 0 && (
+                      <div className="mt-2">
+                        <h4 className="text-sm font-medium text-gray-400 mb-1">URLs</h4>
+                        <div className="max-h-24 overflow-y-auto">
+                          {segment.segmentDetails.urls.map((url, index) => (
+                            <div key={index} className="text-xs bg-gray-800 px-2 py-1 rounded mb-1 truncate">
+                              {url}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {segment.linkedSettings?.siteSettings && segment.linkedSettings.siteSettings.length > 0 && (
+                      <div className="mt-3">
+                        <h4 className="text-sm font-medium text-gray-400 mb-1">Site Settings</h4>
+                        <div className="text-xs text-gray-300">
+                          {segment.linkedSettings.siteSettings.map((setting, index) => (
+                            <div key={index} className="bg-gray-800 px-2 py-1 rounded mb-1">
+                              <span className="font-medium">{setting.type}</span>
+                              {setting.extra && Array.isArray(setting.extra) && (
+                                <div className="mt-1 pl-2 border-l border-gray-700">
+                                  {setting.extra.map((item, i) => (
+                                    <div key={i} className="text-gray-400">{item}</div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="mt-3 pt-3 border-t border-gray-600 flex justify-between items-center">
+                      <div className="text-xs text-gray-400">
+                        {segment.encrypted ? 
+                          <span className="bg-green-900/30 text-green-400 px-2 py-0.5 rounded">Encrypted</span> : 
+                          <span className="bg-red-900/30 text-red-400 px-2 py-0.5 rounded">Unencrypted</span>
+                        }
+                      </div>
+                      <Link
+                        href={`/segments.html?id=${segment.id || segment.segment}`}
+                        className="text-xs bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded text-white"
+                      >
+                        View Details
+                      </Link>
+                    </div>
+                  </Card>
                 ))}
               </div>
             </div>

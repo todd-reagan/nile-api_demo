@@ -50,13 +50,67 @@ class TenantUpdateHandler:
             if missing_keys:
                 continue
             
+            # Extract segment details
+            segment_info = seg.get("segment", {})
+            geo_scope = seg.get("geoScope", {})
+            linked_settings = seg.get("linkedSettings", {})
+            
+            # Create base data object
             data = {
                 "pk": seg["tenantId"],
                 "sk": "SEG#" + seg["id"],
                 "name": seg["instanceName"],
-                "encrypted": seg.get("encrypted", "Unknown"),
-                "version": seg["version"]
+                "encrypted": seg.get("encrypted", True),
+                "version": seg["version"],
+                "id": seg["id"],
+                "useTags": seg.get("useTags", False),
+                "settingStatus": seg.get("settingStatus", "UNKNOWN"),
+                "tagIds": seg.get("tagIds", [])
             }
+            
+            # Add segment details if available
+            if segment_info:
+                data["segmentDetails"] = {
+                    "name": segment_info.get("name", ""),
+                    "urls": segment_info.get("urls", []),
+                    "popTunnelEnabled": segment_info.get("popTunnelEnabled", False),
+                    "wiredSelfRegisterEnabled": segment_info.get("wiredSelfRegisterEnabled", False),
+                    "wiredSsoEnabled": segment_info.get("wiredSsoEnabled", False),
+                    "wiredGuestEnabled": segment_info.get("wiredGuestEnabled", False)
+                }
+            
+            # Add geo scope if available
+            if geo_scope:
+                data["geoScope"] = {
+                    "siteIds": geo_scope.get("siteIds", []),
+                    "buildingIds": geo_scope.get("buildingIds", []),
+                    "zoneIds": geo_scope.get("zoneIds", []),
+                    "globalInfo": geo_scope.get("globalInfo", [])
+                }
+            
+            # Add linked settings if available
+            if linked_settings:
+                # Process different types of settings
+                site_settings = []
+                for setting in linked_settings.get("siteSettings", []):
+                    site_setting = {
+                        "type": setting.get("type", ""),
+                        "id": setting.get("id", ""),
+                        "location": setting.get("location", "")
+                    }
+                    
+                    # Handle extra field which can be null, array, or object
+                    if "extra" in setting:
+                        site_setting["extra"] = setting["extra"]
+                    
+                    site_settings.append(site_setting)
+                
+                data["linkedSettings"] = {
+                    "globalSettings": linked_settings.get("globalSettings", []),
+                    "siteSettings": site_settings,
+                    "buildingSettings": linked_settings.get("buildingSettings", []),
+                    "zoneSettings": linked_settings.get("zoneSettings", [])
+                }
             
             # Store in DynamoDB
             self.table.put_item(Item=data)
