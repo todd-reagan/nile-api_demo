@@ -77,11 +77,13 @@ After deploying the Lambda functions, you should verify that they are working co
 5. Click "Test" to execute the Lambda function
 6. Verify that the function returns the expected response
 
-### Enhanced Location Data
+### Enhanced Data
 
-Several Lambda functions have been enhanced to include location names in the data:
+Several Lambda functions have been enhanced to include additional data:
 
-#### Floor Data (`nileFloors.py`)
+#### Location Data
+
+##### Floor Data (`nileFloors.py`)
 The `nileFloors.py` Lambda function has been enhanced to include site and building names in the floor data. The function now:
 
 1. Loads site and building data from DynamoDB
@@ -89,7 +91,7 @@ The `nileFloors.py` Lambda function has been enhanced to include site and buildi
 3. Includes the site and building names in the floor data
 4. Returns the enhanced floor data to the frontend
 
-#### Building Data (`nileBldg.py`)
+##### Building Data (`nileBldg.py`)
 The `nileBldg.py` Lambda function has been enhanced to include site names in the building data. The function now:
 
 1. Loads site data from DynamoDB
@@ -97,7 +99,27 @@ The `nileBldg.py` Lambda function has been enhanced to include site names in the
 3. Includes the site names in the building data
 4. Returns the enhanced building data to the frontend
 
-These enhancements improve the user experience by showing meaningful names instead of just IDs in the UI. Users can now see the names of sites and buildings associated with each floor, and the names of sites associated with each building, making it easier to understand the data.
+These location enhancements improve the user experience by showing meaningful names instead of just IDs in the UI. Users can now see the names of sites and buildings associated with each floor, and the names of sites associated with each building, making it easier to understand the data.
+
+#### Segment Data
+
+##### Segment Data (`tenantUpdate.py` and `nileSegments.py`)
+The segment data handling has been enhanced to include additional information from the Nile API:
+
+1. `tenantUpdate.py` now stores more detailed segment information in DynamoDB:
+   - Segment details (name, URLs, configuration settings)
+   - Geo scope information (site IDs, building IDs, zone IDs)
+   - Linked settings (RADIUS, DHCP_CLIENT, PORTAL settings)
+   - Tag IDs and other metadata
+
+2. `nileSegments.py` has been updated to return this enhanced data to the frontend
+
+3. The frontend has been updated to display this additional information:
+   - URLs associated with each segment
+   - Site settings with DHCP client information
+   - Encryption status
+
+These segment data enhancements provide users with more detailed information about network segments, making it easier to understand their configuration and relationships.
 
 ## Troubleshooting
 
