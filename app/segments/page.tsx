@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useFetch } from '../hooks';
 import { fetchSegments } from '../services/api';
 import { Segment } from '../types';
@@ -15,6 +15,15 @@ export default function SegmentsPage() {
   const [rawSegmentsData, setRawSegmentsData] = useState<any>(null);
   const [rawDataLoading, setRawDataLoading] = useState<boolean>(false);
   const [rawDataError, setRawDataError] = useState<string | null>(null);
+  const [expandedSegments, setExpandedSegments] = useState<Record<string, boolean>>({});
+  
+  // Toggle expanded state for a segment
+  const toggleSegmentExpanded = useCallback((segmentId: string) => {
+    setExpandedSegments(prev => ({
+      ...prev,
+      [segmentId]: !prev[segmentId]
+    }));
+  }, []);
 
   // Fetch raw segments data from Nile API with retry logic
   useEffect(() => {
@@ -149,55 +158,65 @@ export default function SegmentsPage() {
             <div className="space-y-4">
               <h3 className="text-lg font-medium mb-2">Segments</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-                {tenantSegments.map((segment) => (
-                  <Card
-                    key={segment.segment}
-                    title={segment.segment}
-                    className="bg-gray-700 hover:bg-gray-600 transition-colors duration-200"
-                  >
-                    {segment.segmentDetails?.urls && segment.segmentDetails.urls.length > 0 && (
-                      <div className="mt-2">
-                        <h4 className="text-sm font-medium text-gray-400 mb-1">URLs</h4>
-                        <div className="max-h-24 overflow-y-auto">
-                          {segment.segmentDetails.urls.map((url, index) => (
-                            <div key={index} className="text-xs bg-gray-800 px-2 py-1 rounded mb-1 truncate">
-                              {url}
+                {tenantSegments.map((segment) => {
+                  const segmentId = segment.id || segment.segment;
+                  const isExpanded = expandedSegments[segmentId] || false;
+                  
+                  return (
+                    <Card
+                      key={segment.segment}
+                      title={segment.segment}
+                      className="bg-gray-700"
+                    >
+                      {/* Only show details when expanded */}
+                      {isExpanded && (
+                        <>
+                          {segment.segmentDetails?.urls && segment.segmentDetails.urls.length > 0 && (
+                            <div className="mt-2">
+                              <h4 className="text-sm font-medium text-gray-400 mb-1">URLs</h4>
+                              <div className="max-h-24 overflow-y-auto">
+                                {segment.segmentDetails.urls.map((url, index) => (
+                                  <div key={index} className="text-xs bg-gray-800 px-2 py-1 rounded mb-1 truncate">
+                                    {url}
+                                  </div>
+                                ))}
+                              </div>
                             </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    
-                    {segment.linkedSettings?.siteSettings && segment.linkedSettings.siteSettings.length > 0 && (
-                      <div className="mt-3">
-                        <h4 className="text-sm font-medium text-gray-400 mb-1">Site Settings</h4>
-                        <div className="text-xs text-gray-300">
-                          {segment.linkedSettings.siteSettings.map((setting, index) => (
-                            <div key={index} className="bg-gray-800 px-2 py-1 rounded mb-1">
-                              <span className="font-medium">{setting.type}</span>
-                              {setting.extra && Array.isArray(setting.extra) && (
-                                <div className="mt-1 pl-2 border-l border-gray-700">
-                                  {setting.extra.map((item, i) => (
-                                    <div key={i} className="text-gray-400">{item}</div>
-                                  ))}
-                                </div>
-                              )}
+                          )}
+                          
+                          {segment.linkedSettings?.siteSettings && segment.linkedSettings.siteSettings.length > 0 && (
+                            <div className="mt-3">
+                              <h4 className="text-sm font-medium text-gray-400 mb-1">Site Settings</h4>
+                              <div className="text-xs text-gray-300">
+                                {segment.linkedSettings.siteSettings.map((setting, index) => (
+                                  <div key={index} className="bg-gray-800 px-2 py-1 rounded mb-1">
+                                    <span className="font-medium">{setting.type}</span>
+                                    {setting.extra && Array.isArray(setting.extra) && (
+                                      <div className="mt-1 pl-2 border-l border-gray-700">
+                                        {setting.extra.map((item, i) => (
+                                          <div key={i} className="text-gray-400">{item}</div>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
                             </div>
-                          ))}
-                        </div>
+                          )}
+                        </>
+                      )}
+                      
+                      <div className="mt-3 pt-3 border-t border-gray-600 flex justify-end">
+                        <button
+                          onClick={() => toggleSegmentExpanded(segmentId)}
+                          className="text-xs bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded text-white font-medium"
+                        >
+                          {isExpanded ? 'Hide Details' : 'View Details'}
+                        </button>
                       </div>
-                    )}
-                    
-                    <div className="mt-3 pt-3 border-t border-gray-600 flex justify-end">
-                      <Link
-                        href={`/segments.html?id=${segment.id || segment.segment}`}
-                        className="text-xs bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded text-white font-medium"
-                      >
-                        View Details
-                      </Link>
-                    </div>
-                  </Card>
-                ))}
+                    </Card>
+                  );
+                })}
               </div>
             </div>
           </div>
