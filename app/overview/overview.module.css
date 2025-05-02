@@ -17,21 +17,22 @@
 .treeContainer :global(.rct-tree-item-title-container) {
   padding: 4px 8px;
   border-radius: 4px;
-  color: #ffffff; /* White text for maximum contrast */
-  background-color: #2563eb; /* Light blue background */
-  opacity: 0.6; /* Make it slightly transparent */
+  color: #e2e8f0; /* Light gray text for better readability */
+  background-color: transparent; /* No background by default */
   margin-bottom: 2px;
+  border-left: 2px solid transparent; /* Transparent left border */
 }
 
 .treeContainer :global(.rct-tree-item-title-container:hover) {
-  background-color: #3b82f6; /* Slightly lighter blue on hover */
-  opacity: 0.8; /* Less transparent on hover */
+  background-color: rgba(55, 65, 81, 0.5); /* Subtle gray background on hover */
+  border-left: 2px solid #4b5563; /* Gray left border on hover */
 }
 
 .treeContainer :global(.rct-tree-item-title-container.rct-tree-item-title-container-selected) {
-  background-color: #1e40af; /* Darker blue for selected items */
-  color: white; /* White text for selected items */
-  opacity: 1; /* Fully opaque when selected */
+  background-color: rgba(30, 58, 138, 0.3); /* Very subtle blue background */
+  color: #ffffff; /* White text for selected items */
+  border-left: 2px solid #3b82f6; /* Blue left border for selected items */
+  font-weight: 600; /* Make selected item text slightly bolder */
 }
 
 .treeContainer :global(.rct-tree-items-container) {
@@ -61,4 +62,5 @@
 .treeContainer :global(.rct-tree-item) {
   border-bottom: 1px solid #374151;
   margin-bottom: 2px;
+  background-color: transparent;
 }
