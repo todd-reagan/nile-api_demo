@@ -5,7 +5,7 @@
 mkdir -p deployment
 
 # Package each Lambda function
-for lambda_file in nileSites.py nileBldg.py nileFloors.py nileSegments.py nileTree.py tenantUpdate.py mabUpdate.py; do
+for lambda_file in nileSites.py nileBldg.py nileFloors.py nileSegments.py nileTree.py tenantUpdate.py mabUpdate.py nileApiKeys.py; do
   echo "Packaging $lambda_file..."
   
   # Create a temporary directory for this Lambda
