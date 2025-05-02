@@ -198,23 +198,10 @@ export default function SegmentsPage() {
                       {/* Only show details when expanded */}
                       {isExpanded && (
                         <>
-                          {segment.segmentDetails?.urls && segment.segmentDetails.urls.length > 0 && (
-                            <div className="mt-2">
-                              <h4 className="text-sm font-medium text-gray-400 mb-1">URLs</h4>
-                              <div className="max-h-24 overflow-y-auto">
-                                {segment.segmentDetails.urls.map((url, index) => (
-                                  <div key={index} className="text-xs bg-gray-800 px-2 py-1 rounded mb-1 truncate">
-                                    {url}
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                          
                           {/* Only show site settings if there are any with extra data */}
                           {segment.linkedSettings?.siteSettings && 
                            segment.linkedSettings.siteSettings.some(setting => setting.extra && Array.isArray(setting.extra) && setting.extra.length > 0) && (
-                            <div className="mt-3">
+                            <div className="mt-2">
                               <h4 className="text-sm font-medium text-gray-400 mb-1">Site Settings</h4>
                               <div className="text-xs text-gray-300">
                                 {segment.linkedSettings.siteSettings
@@ -237,6 +224,19 @@ export default function SegmentsPage() {
                                         </div>
                                       )}
                                     </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          
+                          {segment.segmentDetails?.urls && segment.segmentDetails.urls.length > 0 && (
+                            <div className="mt-3">
+                              <h4 className="text-sm font-medium text-gray-400 mb-1">URLs</h4>
+                              <div className="max-h-24 overflow-y-auto">
+                                {segment.segmentDetails.urls.map((url, index) => (
+                                  <div key={index} className="text-xs bg-gray-800 px-2 py-1 rounded mb-1 truncate">
+                                    {url}
+                                  </div>
                                 ))}
                               </div>
                             </div>
