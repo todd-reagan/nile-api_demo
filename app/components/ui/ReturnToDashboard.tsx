@@ -9,7 +9,7 @@ interface ReturnToDashboardProps {
 export default function ReturnToDashboard({ className = '' }: ReturnToDashboardProps) {
   return (
     <Link 
-      href="/index.html" 
+      href="/" 
       className={`text-gray-300 hover:text-white transition-colors duration-200 ${className}`}
     >
       Return to Dashboard

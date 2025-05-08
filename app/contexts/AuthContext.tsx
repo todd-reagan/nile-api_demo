@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { CognitoUser } from 'amazon-cognito-identity-js';
 import * as authService from '../services/auth';
 import { UserAttributes, ApiKey } from '../services/auth';
+import { COGNITO_CONFIG } from '../config/cognito'; // Import Cognito config
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -43,14 +44,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       try {
         // Check if we have valid Cognito credentials
         const hasValidConfig = 
-          process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID && 
-          process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID !== 'your-user-pool-id' &&
-          process.env.NEXT_PUBLIC_COGNITO_APP_CLIENT_ID && 
-          process.env.NEXT_PUBLIC_COGNITO_APP_CLIENT_ID !== 'your-app-client-id';
+          COGNITO_CONFIG.USER_POOL_ID && 
+          COGNITO_CONFIG.USER_POOL_ID !== 'your-user-pool-id' && // Retain check against placeholder
+          COGNITO_CONFIG.USER_POOL_ID !== 'us-west-2_dummypool' && // Also check against default from cognito.ts
+          COGNITO_CONFIG.APP_CLIENT_ID && 
+          COGNITO_CONFIG.APP_CLIENT_ID !== 'your-app-client-id' && // Retain check against placeholder
+          COGNITO_CONFIG.APP_CLIENT_ID !== '1234567890abcdefghij'; // Also check against default from cognito.ts
 
         // Skip authentication if we don't have valid credentials
         if (!hasValidConfig) {
-          console.warn('Skipping authentication check due to missing or invalid Cognito configuration');
+          console.warn('Skipping authentication check due to missing, default, or invalid Cognito configuration. Please check environment variables and app/config/cognito.ts');
           setIsLoading(false);
           return;
         }

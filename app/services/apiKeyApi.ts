@@ -2,10 +2,11 @@
 
 import { getJwtToken } from './auth';
 import { ApiKey } from './auth';
+import { API_KEYS_ENDPOINT } from '../constants';
 
 // API endpoint for API keys management
 // In a production environment, this should be loaded from environment variables
-const API_ENDPOINT = process.env.NEXT_PUBLIC_API_KEYS_ENDPOINT || 'https://api.example.com/prod/api-keys';
+// const API_ENDPOINT = process.env.NEXT_PUBLIC_API_KEYS_ENDPOINT || 'https://api.example.com/prod/api-keys'; // Replaced by API_KEYS_ENDPOINT from constants
 
 /**
  * Extract user ID from JWT token
@@ -49,7 +50,7 @@ export async function fetchApiKeys(): Promise<ApiKey[]> {
   const userId = extractUserIdFromToken(token);
 
   // Include userId as a query parameter
-  const url = new URL(API_ENDPOINT);
+  const url = new URL(API_KEYS_ENDPOINT);
   if (userId) {
     url.searchParams.append('userId', userId);
   }
@@ -107,7 +108,7 @@ export async function createApiKey(
   const userId = extractUserIdFromToken(token);
 
   // Include the user ID in the request body as a fallback
-  const response = await fetch(API_ENDPOINT, {
+  const response = await fetch(API_KEYS_ENDPOINT, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -170,7 +171,7 @@ export async function updateApiKey(
   // Extract user ID from token
   const userId = extractUserIdFromToken(token);
 
-  const response = await fetch(API_ENDPOINT, {
+  const response = await fetch(API_KEYS_ENDPOINT, {
     method: 'PUT',
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -220,7 +221,7 @@ export async function deleteApiKey(id: string): Promise<void> {
   const userId = extractUserIdFromToken(token);
 
   // Include userId as a query parameter
-  const url = new URL(API_ENDPOINT);
+  const url = new URL(API_KEYS_ENDPOINT);
   url.searchParams.append('keyId', id);
   if (userId) {
     url.searchParams.append('userId', userId);

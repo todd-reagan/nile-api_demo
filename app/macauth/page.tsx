@@ -2,7 +2,8 @@
 
 import { Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useFetch, useForm } from '../hooks';
+import useSWR from 'swr'; // Import useSWR
+import { useForm } from '../hooks'; // Keep useForm, remove useFetch if no longer needed elsewhere
 import { fetchSegments, authorizeDevice, DeviceAuthorizationParams } from '../services/api';
 import { Segment } from '../types';
 import { DEVICE_STATUS_OPTIONS } from '../constants';
@@ -14,7 +15,16 @@ function MacAuthContent() {
   const deviceId = searchParams.get('deviceId');
   const macAddress = searchParams.get('macAddress');
 
-  const { data: segments, loading: segmentsLoading, error: segmentsError } = useFetch<Segment[]>(fetchSegments);
+  // Use SWR to fetch segments - provides caching and revalidation
+  // The key '/api/segments' uniquely identifies this data fetch.
+  const { 
+    data: segments, 
+    error: segmentsSwrError, // Corrected variable name for SWR error object
+    isLoading: segmentsLoading // SWR uses isLoading instead of loading
+  } = useSWR<Segment[]>('/api/segments', fetchSegments); 
+
+  // Convert potential SWR error object to a string message for consistency with ErrorDisplay
+  const segmentsError = segmentsSwrError ? (segmentsSwrError instanceof Error ? segmentsSwrError.message : String(segmentsSwrError)) : null; // Corrected variable name
   
   const { values, errors, isSubmitting, handleChange, setFieldValue, setFieldError, handleSubmit } = useForm<{
     status: string;
@@ -51,8 +61,8 @@ function MacAuthContent() {
         description: values.description
       });
 
-      // Redirect back to devices page on success
-      router.push('/devices.html');
+      // Redirect back to devices page on success, passing success flag and MAC address
+      router.push(`/devices?authSuccess=true&mac=${encodeURIComponent(macAddress || '')}`);
     } catch (err) {
       console.error('Error submitting form:', err);
       setFieldError('form', err instanceof Error ? err.message : 'An unknown error occurred');
@@ -126,11 +136,15 @@ function MacAuthContent() {
               className="block w-full rounded-md bg-gray-700 border-gray-600 text-white focus:border-blue-500 focus:ring-blue-500"
               disabled={segmentsLoading}
             >
-              <option value="Select Segment">Select Segment</option>
+              <option value="Select Segment" disabled>Select Segment</option> {/* Keep disabled placeholder */}
               {segments?.map((segment) => (
-                <option key={segment.segment} value={segment.segment}>
-                  {segment.segment}
-                </option>
+                // Use segment.id as the value, but display segment.segment (name)
+                // Ensure segment.id is available and non-empty
+                segment.id ? (
+                  <option key={segment.id} value={segment.id}>
+                    {segment.segment} {/* Display name */}
+                  </option>
+                ) : null // Or handle segments without IDs differently if needed
               ))}
             </select>
             {segmentsLoading && (

@@ -6,20 +6,23 @@ import { PageLayout, LoadingState, ErrorState, Card, DataItem } from '../compone
 import { useAuth } from '../contexts/AuthContext';
 import ProtectedRoute from '../components/auth/ProtectedRoute';
 
-export default function ClientsPage() {
+export default function ClientDetailsPage() {
   return (
     <ProtectedRoute>
-      <ClientsContent />
+      <ClientDetailsContent />
     </ProtectedRoute>
   );
 }
 
-function ClientsContent() {
+function ClientDetailsContent() {
   const { apiKeys } = useAuth();
   const [clientData, setClientData] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [tenantId, setTenantId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
 
   // Find tenant ID from API keys
   useEffect(() => {
@@ -67,7 +70,19 @@ function ClientsContent() {
         }
 
         const token = nileApiKey.key;
-        const url = `https://u1.nile-global.cloud/api/v3/client-configs/tenant/${tenantId}`;
+        // Set endTime to yesterday at the current time
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const endTime = yesterday.toISOString().split('.')[0] + 'Z';
+        
+        // Set startTime to 2 weeks ago
+        const twoWeeksAgo = new Date();
+        twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+        const startTime = twoWeeksAgo.toISOString().split('.')[0] + 'Z';
+        
+        // Use the URL format with tenant ID in the path as specified by the user
+        // Page number starts at 1, not 0
+        const url = `https://u1.nile-global.cloud/api/v1/client-list-paginated-details/tenant/${tenantId}?startTime=${encodeURIComponent(startTime)}&endTime=${encodeURIComponent(endTime)}&pageNumber=${parseInt(String(currentPage), 10)}&pageSize=${parseInt(String(pageSize), 10)}`;
         
         // Add retry logic for 401 responses
         const MAX_RETRIES = 5;
@@ -84,9 +99,13 @@ function ClientsContent() {
               await new Promise(resolve => setTimeout(resolve, backoff * 1000));
             }
             
-            // Make the API request
+            // Make the API request with API key only, matching the segments page
             response = await fetch(url, {
-              headers: { 'x-nile-api-key': token.trim() }
+              headers: { 
+                'x-nile-api-key': token.trim(),
+                'Origin': window.location.origin
+              },
+              mode: 'cors'
             });
             
             console.log(`Response received. Status: ${response.status}`);
@@ -108,6 +127,12 @@ function ClientsContent() {
             
             // If we got here, the request was successful
             responseData = await response.json();
+            
+            // Set total pages based on response
+            if (responseData.totalPages) {
+              setTotalPages(responseData.totalPages);
+            }
+            
             break;
           } catch (error) {
             // If this is a network error, retry
@@ -132,10 +157,17 @@ function ClientsContent() {
     };
     
     fetchClientData();
-  }, [tenantId, apiKeys]);
+  }, [tenantId, apiKeys, currentPage, pageSize]);
+
+  // Handle page change
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
 
   if (loading) {
-    return <LoadingState message="Loading client information..." />;
+    return <LoadingState message="Loading detailed client information..." />;
   }
 
   if (error) {
@@ -168,7 +200,7 @@ function ClientsContent() {
   };
   
   return (
-    <PageLayout title="Client Information">
+    <PageLayout title="Detailed Client Information">
       <div className="mb-6">
         <div className="bg-gray-800 rounded-lg p-4 mb-4">
           <h2 className="text-xl font-semibold mb-2">Tenant ID</h2>
@@ -176,12 +208,35 @@ function ClientsContent() {
         </div>        
       </div>
       
+      {/* Pagination Controls */}
+      <div className="flex justify-between items-center mb-6">
+        <div className="text-gray-300">
+          Page {currentPage} of {totalPages}
+        </div>
+        <div className="flex space-x-2">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="px-4 py-2 bg-gray-700 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Previous
+          </button>
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="px-4 py-2 bg-gray-700 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+      
       {/* Client Cards Section */}
-      {clientData && clientData.length > 0 && (
+      {clientData && clientData.clients && clientData.clients.length > 0 && (
         <div className="mb-12">
           <h2 className="text-2xl font-bold mb-6 text-white">Client Devices</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {clientData.map((client: any, index: number) => {
+            {clientData.clients.map((client: any, index: number) => {
               const config = client.clientConfig || {};
               const info = client.clientInfo || {};
               
@@ -261,9 +316,9 @@ function ClientsContent() {
       <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
         <h2 className="text-2xl font-bold mb-4 text-white">Raw Client Configuration Data</h2>
         <p className="text-gray-300 mb-6">
-          This page displays client configuration information for the tenant. The data is fetched from the Nile API endpoint:
+          This page displays detailed client information with pagination. The data is fetched from the Nile API endpoint:
           <code className="ml-2 px-2 py-1 bg-gray-900 rounded text-blue-400">
-            https://u1.nile-global.cloud/api/v3/client-configs/tenant/{tenantId}
+            https://u1.nile-global.cloud/api/v1/client-list-paginated-details/tenant/[tenantId]?startTime=[2 weeks ago]&endTime=[yesterday]&pageNumber=[pageNumber (starts at 1)]&pageSize=[pageSize]
           </code>
         </p>
 

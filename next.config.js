@@ -4,8 +4,7 @@ const nextConfig = {
   images: {
     unoptimized: true
   },
-  trailingSlash: false,
-  // Remove assetPrefix as it's causing issues with next/font
+  trailingSlash: true,
 }
 
 module.exports = nextConfig

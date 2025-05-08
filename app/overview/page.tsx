@@ -191,7 +191,7 @@ export default function OverviewPage() {
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-2xl font-bold">{site.name}</h2>
               <Link 
-                href={`/sites.html?id=${site.siteid}`}
+                href={`/sites?id=${site.siteid}`}
                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white text-sm transition-colors"
               >
                 View Site Details
@@ -215,7 +215,7 @@ export default function OverviewPage() {
                 {site.buildings.map(building => (
                   <Link
                     key={building.bldgid}
-                    href={`/bldg.html?id=${building.bldgid}`}
+                    href={`/bldg?id=${building.bldgid}`}
                     className="bg-gray-700 hover:bg-gray-600 p-3 rounded transition-colors"
                   >
                     <p className="font-medium">{building.name}</p>
@@ -237,7 +237,7 @@ export default function OverviewPage() {
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-2xl font-bold">{building.name}</h2>
               <Link 
-                href={`/bldg.html?id=${building.bldgid}`}
+                href={`/bldg?id=${building.bldgid}`}
                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white text-sm transition-colors"
               >
                 View Building Details
@@ -263,7 +263,7 @@ export default function OverviewPage() {
                 {building.floors.map(floor => (
                   <Link
                     key={floor.floorid}
-                    href={`/floor.html?id=${floor.floorid}`}
+                    href={`/floor?id=${floor.floorid}`}
                     className="bg-gray-700 hover:bg-gray-600 p-3 rounded transition-colors"
                   >
                     <p className="font-medium">{floor.name}</p>
@@ -288,7 +288,7 @@ export default function OverviewPage() {
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-2xl font-bold">{floor.name}</h2>
               <Link 
-                href={`/floor.html?id=${floor.floorid}`}
+                href={`/floor?id=${floor.floorid}`}
                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white text-sm transition-colors"
               >
                 View Floor Details

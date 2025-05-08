@@ -141,10 +141,34 @@ export interface DeviceAuthorizationParams {
 
 export async function authorizeDevice(params: DeviceAuthorizationParams) {
   const headers = await getApiHeaders();
+
+  // Map frontend status to Lambda state
+  let lambdaState: string;
+  if (params.status === 'Approved') {
+    lambdaState = 'AUTH_OK';
+  } else if (params.status === 'Denied') {
+    lambdaState = 'AUTH_DENIED';
+  } else {
+    // Handle unexpected status, or throw error
+    console.error('Invalid status for authorization:', params.status);
+    throw new Error(`Invalid status provided: ${params.status}`);
+  }
+
+  // Prepare payload for the Lambda function
+  // The deviceId from the URL is the clientId for the MAB entry.
+  // The macAddress from the URL is the macAddress.
+  const payload = {
+    clientId: params.deviceId, // deviceId from URL is the client's unique ID
+    macAddress: params.macAddress,
+    segmentId: params.segmentId,
+    state: lambdaState,
+    description: params.description // Include description from params
+  };
+
   const response = await fetch(AUTH_API_URL, {
-    method: 'POST',
+    method: 'PATCH', // Changed from POST to PATCH
     headers,
-    body: JSON.stringify(params)
+    body: JSON.stringify(payload) // Send the transformed payload
   });
   
   return handleResponse(response);

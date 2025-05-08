@@ -9,7 +9,7 @@ interface ReturnToDevicesProps {
 export default function ReturnToDevices({ className = '' }: ReturnToDevicesProps) {
   return (
     <Link 
-      href="/devices.html" 
+      href="/devices" 
       className={`text-gray-300 hover:text-white transition-colors duration-200 ${className}`}
     >
       Return to Devices

@@ -2,10 +2,14 @@ import { DashboardItem } from '../types';
 
 // API URLs
 // NOTE: In a production environment, these values should be loaded from environment variables
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.example.com/prod';
-export const AUTH_API_URL = process.env.NEXT_PUBLIC_AUTH_API_URL || 'https://auth.example.com/';
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://ofthddzjjh.execute-api.us-west-2.amazonaws.com/prod';
+// AUTH_API_URL will now be derived from API_BASE_URL
+// Ensure your API Gateway has a resource like /mabupdate that routes PATCH to the nileMABUpdate Lambda
+export const AUTH_API_URL = `${API_BASE_URL}/mabupdate`; 
 
 // API Endpoints
+export const API_KEYS_ENDPOINT = process.env.NEXT_PUBLIC_API_KEYS_ENDPOINT || 'https://api.example.com/prod/api-keys';
+
 export const API_ENDPOINTS = {
   TREE: `${API_BASE_URL}/tree`,
   SITES: `${API_BASE_URL}/sites`,
@@ -28,31 +32,31 @@ export const DASHBOARD_ITEMS: DashboardItem[] = [
   {
     title: 'Overview',
     description: 'View tenant hierarchy',
-    href: '/overview.html',
+    href: '/overview',
     requiresAuth: true,
   },
   {
     title: 'Site Information',
     description: 'View Site details',
-    href: '/sites.html',
+    href: '/sites',
     requiresAuth: true,
   },
   {
     title: 'Building Information',
     description: 'View building details',
-    href: '/bldg.html',
+    href: '/bldg',
     requiresAuth: true,
   },
   {
     title: 'Floor Information',
     description: 'View floor details',
-    href: '/floor.html',
+    href: '/floor',
     requiresAuth: true,
   },
   {
     title: 'Network Segments',
     description: 'View network segments details',
-    href: '/segments.html',
+    href: '/segments',
     requiresAuth: true,
   },
   {
@@ -64,7 +68,7 @@ export const DASHBOARD_ITEMS: DashboardItem[] = [
   {
     title: 'Devices Needing Approval',
     description: 'View device details waiting for approval',
-    href: '/devices.html',
+    href: '/devices',
     requiresAuth: true,
   },
   {
@@ -76,7 +80,7 @@ export const DASHBOARD_ITEMS: DashboardItem[] = [
   {
     title: 'Update Database Data',
     description: 'Refresh and update all database information',
-    href: '/update.html',
+    href: '/update',
     requiresAuth: true,
   },
   {
