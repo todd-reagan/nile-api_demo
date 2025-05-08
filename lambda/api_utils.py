@@ -271,9 +271,10 @@ class NileApiClient:
             raise Exception(f"Could not get client data. Data is not a list: {type(data)}, data: {data}")
 
         logger.info(f"Found {len(data)} clients in response")
-        
+        # If no clients are found, return an empty list instead of raising an exception.
         if not data:
-            logger.warning("No clients found in response")
-            raise Exception("No clients found for this tenant.")
+            logger.warning("No clients found in response, returning empty list.")
+            return [] # Return empty list for 200 OK response
+            # raise Exception("No clients found for this tenant.") # Previous behavior
             
         return data

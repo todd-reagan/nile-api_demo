@@ -5,7 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation'; // Import useSearc
 import { NetworkDevice, Building, Floor } from '../types'; // Add Building and Floor types
 import { useFetch } from '../hooks';
 import { fetchDevices, fetchBuildings, fetchFloors } from '../services/api'; // Add fetchBuildings and fetchFloors
-import { PageLayout, LoadingState, ErrorState, DataItem } from '../components/ui';
+// Import InfoState along with other UI components
+import { PageLayout, LoadingState, ErrorState, DataItem, InfoState } from '../components/ui'; 
 import { useMemo, useState, useEffect } from 'react'; // Import useState, useEffect
 
 // Component to read search params and render content
@@ -154,7 +155,8 @@ function DevicesPageContent() {
   }
 
   if (!groupedAndSortedData || groupedAndSortedData.sortedBuildingKeys.length === 0) {
-    return <ErrorState title="No Devices Requiring Attention" message="No devices currently need authorization." />;
+    // Use InfoState for the "no devices" message
+    return <InfoState title="No Devices Requiring Attention" message="No devices currently need authorization." />; 
   }
 
   // Destructure the processed data only if it's available
@@ -176,6 +178,11 @@ function DevicesPageContent() {
           Device with MAC address {decodeURIComponent(updatedMac)} was successfully authorized.
         </div>
       )}
+
+      {/* Instructional Text */}
+      <p className="text-sm text-gray-400 mb-6">
+        Click on a device row in the tables below to manage its authorization status.
+      </p>
 
       {/* Container for all building groups */}
       <div className="space-y-8">
@@ -217,42 +224,47 @@ function DevicesPageContent() {
                         </h3>
                         {/* Container for devices within this floor group - Render only if floor is expanded */}
                         {isFloorExpanded && (
-                          <div className="space-y-4 ml-4">
-                            {floorDevices.map((device) => (
-                              // --- Start Device Card ---
-                              <div
-                            key={device.id}
-                            onClick={() => handleCardClick(device)}
-                            className="bg-gray-800 rounded-lg p-4 shadow-md hover:bg-gray-700 cursor-pointer transition-colors duration-150"
-                          >
-                            <div className="flex flex-col space-y-2">
-                              <div className="flex justify-between items-center border-b border-gray-700 pb-2 mb-2">
-                                <h3 className="text-lg font-semibold text-white">{device.macAddress}</h3>
-                                <span className={`px-2 py-1 rounded text-xs font-medium ${
-                                  device.state === 'AUTH_OK' ? 'bg-green-900 text-green-200' :
-                                  device.state === 'AUTH_DENIED' ? 'bg-red-900 text-red-200' :
-                                  (device.state === 'AUTH_WAITING_FOR_APPROVAL' && device.authenticatedBy?.startsWith('DOT1X')) ? 'bg-blue-900 text-blue-200' :
-                                  'bg-yellow-900 text-yellow-200'
-                                }`}>
-                                  {device.state === 'AUTH_OK' ? 'Approved' :
-                                   device.state === 'AUTH_DENIED' ? 'Denied' :
-                                   device.state === 'AUTH_WAITING_FOR_APPROVAL' ? 'Waiting Approval' :
-                                   device.state}
-                                </span>
-                              </div>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                <DataItem label="Port" value={device.port} />
-                                <DataItem label="Authentication" value={device.authenticatedBy} />
-                                <DataItem label="IP Address" value={device.ipaddress || 'N/A'} />
-                                <DataItem label="Device ID" value={device.deviceid} />
-                              </div>
-                              <div className="mt-2 pt-2 border-t border-gray-700 text-xs text-gray-400">
-                                Click to manage device authorization
-                              </div>
-                            </div>
-                          </div>
-                              // --- End Device Card ---
-                            ))}
+                          <div className="overflow-x-auto ml-4"> {/* Indent table and allow horizontal scroll if needed */}
+                            <table className="min-w-full divide-y divide-gray-700">
+                              <thead className="bg-gray-800">
+                                <tr>
+                                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">MAC Address</th>
+                                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Status</th>
+                                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Authenticated By</th>
+                                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Port</th>
+                                  {/* <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">IP Address</th> */}
+                                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Nile Device ID</th>
+                                </tr>
+                              </thead>
+                              <tbody className="bg-gray-800 divide-y divide-gray-700">
+                                {floorDevices.map((device) => (
+                                  <tr 
+                                    key={device.id} 
+                                    onClick={() => handleCardClick(device)} 
+                                    className="hover:bg-gray-700 cursor-pointer"
+                                  >
+                                    <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-white">{device.macAddress}</td>
+                                    <td className="px-4 py-3 whitespace-nowrap text-sm">
+                                      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                        device.state === 'AUTH_OK' ? 'bg-green-900 text-green-200' :
+                                        device.state === 'AUTH_DENIED' ? 'bg-red-900 text-red-200' :
+                                        (device.state === 'AUTH_WAITING_FOR_APPROVAL' && device.authenticatedBy?.startsWith('DOT1X')) ? 'bg-blue-900 text-blue-200' :
+                                        'bg-yellow-900 text-yellow-200'
+                                      }`}>
+                                        {device.state === 'AUTH_OK' ? 'Approved' :
+                                         device.state === 'AUTH_DENIED' ? 'Denied' :
+                                         device.state === 'AUTH_WAITING_FOR_APPROVAL' ? 'Waiting Approval' :
+                                         device.state}
+                                      </span>
+                                    </td>
+                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{device.authenticatedBy || 'N/A'}</td>
+                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{device.port || 'N/A'}</td>
+                                    {/* <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{device.ipaddress || 'N/A'}</td> */}
+                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{device.deviceid || 'N/A'}</td> {/* This is the Nile internal device ID */}
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
                           </div>
                         )} {/* End conditional rendering for devices */}
                       </div> // End container for single floor group

@@ -176,86 +176,112 @@ export default function SegmentsPage() {
       <div className="space-y-8 mb-8">
         {Object.entries(segmentsByTenant).map(([tenantId, tenantSegments]) => (
           <div key={tenantId} className="bg-gray-800 rounded-lg shadow-md p-6">
-            {/* Tenant Information */}
+            {/* Tenant Information - Removed */}
+            {/* 
             <h2 className="text-2xl font-semibold mb-4">
               Tenant: {tenantId}
-            </h2>
+            </h2> 
+            */}
 
-            {/* Segments */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium mb-2">Segments</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-                {tenantSegments.map((segment) => {
-                  const segmentId = segment.id || segment.segment;
-                  const isExpanded = expandedSegments[segmentId] || false;
-                  
-                  return (
-                    <Card
-                      key={segment.segment}
-                      title={segment.segment}
-                      className="bg-gray-700"
-                    >
-                      {/* Only show details when expanded */}
-                      {isExpanded && (
-                        <>
-                          {/* Only show site settings if there are any with extra data */}
-                          {segment.linkedSettings?.siteSettings && 
-                           segment.linkedSettings.siteSettings.some(setting => setting.extra && Array.isArray(setting.extra) && setting.extra.length > 0) && (
-                            <div className="mt-2">
-                              <h4 className="text-sm font-medium text-gray-400 mb-1">Site Settings</h4>
-                              <div className="text-xs text-gray-300">
-                                {segment.linkedSettings.siteSettings
-                                  .filter(setting => setting.extra && Array.isArray(setting.extra) && setting.extra.length > 0)
-                                  .map((setting, index) => (
-                                    <div key={index} className="bg-gray-800 px-2 py-1 rounded mb-1">
-                                      {setting.location && (
-                                        <div className="mb-1">
-                                          <span className={`text-xs ${siteColorMap[setting.location] || 'bg-blue-900/50'} px-2 py-0.5 rounded inline-block mb-1`}>
-                                            {siteMap[setting.location] || setting.location}
-                                          </span>
-                                          <span className="font-medium ml-2">{setting.type}</span>
-                                        </div>
-                                      )}
-                                      {setting.extra && Array.isArray(setting.extra) && (
-                                        <div className="pl-2 border-l border-gray-700">
-                                          {setting.extra.map((item, i) => (
-                                            <div key={i} className="text-gray-400">{item}</div>
-                                          ))}
-                                        </div>
-                                      )}
+            {/* Segments Table */}
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-700">
+                <thead className="bg-gray-700">
+                  <tr>
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider w-1/4">Segment Name</th>
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">ID</th>
+                    {/* <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Encrypted</th> */}
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Version</th>
+                    {/* <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Site Settings</th> */}
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">URLs</th>
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-gray-800 divide-y divide-gray-700">
+                  {tenantSegments.map((segment) => {
+                    const segmentKey = segment.id || segment.segment; // Use ID if available, else name as key
+                    const isExpanded = expandedSegments[segmentKey] || false;
+                    const hasSiteSettings = segment.linkedSettings?.siteSettings && 
+                                            segment.linkedSettings.siteSettings.some(setting => setting.extra && Array.isArray(setting.extra) && setting.extra.length > 0);
+                    const hasUrls = segment.segmentDetails?.urls && segment.segmentDetails.urls.length > 0;
+
+                    return (
+                      <>
+                        <tr key={segmentKey} className="hover:bg-gray-700">
+                          <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-white">{segment.segment || 'N/A'}</td>
+                          <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{segment.id || 'N/A'}</td>
+                          {/* <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{segment.encrypted ? 'Yes' : 'No'}</td> */}
+                          <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{segment.version || 'N/A'}</td>
+                          {/* <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{hasSiteSettings ? 'Yes' : 'No'}</td> */}
+                          <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{hasUrls ? 'Yes' : 'No'}</td>
+                          <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
+                            <button
+                              onClick={() => toggleSegmentExpanded(segmentKey)}
+                              className="text-xs bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded text-white font-medium"
+                            >
+                              {isExpanded ? 'Hide Details' : 'View Details'}
+                            </button>
+                          </td>
+                        </tr>
+                        {/* Expanded Row for Details */}
+                        {isExpanded && (
+                          <tr key={`${segmentKey}-details`} className="bg-gray-750">
+                            <td colSpan={5} className="px-4 py-4"> {/* Adjusted colSpan to 5 */}
+                              <div className="space-y-4">
+                                {/* Site Settings Detail */}
+                                {hasSiteSettings && (
+                                  <div>
+                                    <h4 className="text-sm font-medium text-gray-300 mb-1">Site Settings</h4>
+                                    <div className="text-xs text-gray-300 space-y-1">
+                                      {segment.linkedSettings!.siteSettings!
+                                        .filter(setting => setting.extra && Array.isArray(setting.extra) && setting.extra.length > 0)
+                                        .map((setting, index) => (
+                                          <div key={index} className="bg-gray-800 px-2 py-1 rounded">
+                                            {setting.location && (
+                                              <div className="mb-1">
+                                                <span className={`text-xs ${siteColorMap[setting.location] || 'bg-gray-600'} px-2 py-0.5 rounded inline-block mb-1`}>
+                                                  {siteMap[setting.location] || setting.location}
+                                                </span>
+                                                <span className="font-medium ml-2">{setting.type}</span>
+                                              </div>
+                                            )}
+                                            {setting.extra && Array.isArray(setting.extra) && (
+                                              <div className="pl-2 border-l border-gray-600">
+                                                {setting.extra.map((item, i) => (
+                                                  <div key={i} className="text-gray-400">{item}</div>
+                                                ))}
+                                              </div>
+                                            )}
+                                          </div>
+                                        ))}
                                     </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                          
-                          {segment.segmentDetails?.urls && segment.segmentDetails.urls.length > 0 && (
-                            <div className="mt-3">
-                              <h4 className="text-sm font-medium text-gray-400 mb-1">URLs</h4>
-                              <div className="max-h-24 overflow-y-auto">
-                                {segment.segmentDetails.urls.map((url, index) => (
-                                  <div key={index} className="text-xs bg-gray-800 px-2 py-1 rounded mb-1 truncate">
-                                    {url}
                                   </div>
-                                ))}
+                                )}
+                                {/* URLs Detail */}
+                                {hasUrls && (
+                                  <div>
+                                    <h4 className="text-sm font-medium text-gray-300 mb-1">URLs</h4>
+                                    <div className="max-h-32 overflow-y-auto space-y-1">
+                                      {segment.segmentDetails!.urls!.map((url, index) => (
+                                        <div key={index} className="text-xs bg-gray-800 px-2 py-1 rounded truncate">
+                                          {url}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                                {!hasSiteSettings && !hasUrls && (
+                                   <p className="text-sm text-gray-400">No additional details available for this segment.</p>
+                                )}
                               </div>
-                            </div>
-                          )}
-                        </>
-                      )}
-                      
-                      <div className="mt-3 pt-3 border-t border-gray-600 flex justify-end">
-                        <button
-                          onClick={() => toggleSegmentExpanded(segmentId)}
-                          className="text-xs bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded text-white font-medium"
-                        >
-                          {isExpanded ? 'Hide Details' : 'View Details'}
-                        </button>
-                      </div>
-                    </Card>
-                  );
-                })}
-              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           </div>
         ))}

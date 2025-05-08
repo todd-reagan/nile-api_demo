@@ -106,7 +106,7 @@ function MacAuthContent() {
               name="status"
               value={values.status}
               onChange={handleChange}
-              className="block w-full rounded-md bg-gray-700 border-gray-600 text-white focus:border-blue-500 focus:ring-blue-500"
+              className="block w-full rounded-md bg-gray-700 border-gray-500 text-white shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               {DEVICE_STATUS_OPTIONS.map(option => (
                 <option 
@@ -133,7 +133,7 @@ function MacAuthContent() {
               name="segment"
               value={values.segment}
               onChange={handleChange}
-              className="block w-full rounded-md bg-gray-700 border-gray-600 text-white focus:border-blue-500 focus:ring-blue-500"
+              className="block w-full rounded-md bg-gray-700 border-gray-500 text-white shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               disabled={segmentsLoading}
             >
               <option value="Select Segment" disabled>Select Segment</option> {/* Keep disabled placeholder */}
@@ -165,7 +165,7 @@ function MacAuthContent() {
               name="description"
               value={values.description}
               onChange={handleChange}
-              className="block w-full rounded-md bg-gray-700 border-gray-600 text-white focus:border-blue-500 focus:ring-blue-500"
+              className="block w-full rounded-md bg-gray-700 border-gray-500 text-white shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               rows={3}
               placeholder="Enter description..."
             />
