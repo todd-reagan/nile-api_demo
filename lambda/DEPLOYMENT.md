@@ -10,7 +10,7 @@ This guide explains how to deploy the updated Lambda functions to AWS.
 
 ## Packaging the Lambda Functions
 
-The Lambda functions need to be packaged with the `utils.py` module. A script is provided to automate this process:
+The Lambda functions need to be packaged for deployment. A script is provided to automate this process:
 
 ```bash
 # Navigate to the lambda directory
@@ -132,6 +132,5 @@ If you encounter any issues with the deployed Lambda functions, check the CloudW
 
 Common issues:
 
-- **Missing utils module**: Make sure the `utils.py` file is included in the zip file
 - **Permission issues**: Ensure the Lambda execution role has the necessary permissions to access DynamoDB
 - **Environment variables**: Check that any required environment variables are set correctly

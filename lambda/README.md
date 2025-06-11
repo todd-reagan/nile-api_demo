@@ -7,21 +7,19 @@ This directory contains AWS Lambda functions that power the Nile API Demo backen
 The Lambda functions follow a standardized architecture:
 
 1. Each function is responsible for a specific resource (sites, buildings, floors, segments, etc.)
-2. All functions share common utilities from `utils.py`
-3. Each function uses a handler class that extends the `NileBaseHandler` base class
-4. All functions use a standardized Lambda handler pattern
+2. Each function is self-contained and does not share code with other Lambda functions, with the exception of `api_utils.py` which is used by `nileTenantUpdate.py` and `nileMABUpdate.py`.
 
 ## Files
 
-- `utils.py` - Common utilities and base classes for all Lambda functions
 - `api_utils.py` - Utilities for making API requests to external services
-- `nileTree.py` - Retrieves the complete tenant hierarchy (sites, buildings, floors)
-- `nileSites.py` - Retrieves site information
+- `nileApiKeys.py` - Manages API keys
 - `nileBldg.py` - Retrieves building information
 - `nileFloors.py` - Retrieves floor information
+- `nileMABUpdate.py` - Retrieves client data from the Nile API and updates MAB client states
 - `nileSegments.py` - Retrieves network segment information
-- `tenantUpdate.py` - Updates tenant data from the Nile API
-- `mabUpdate.py` - Retrieves client data from the Nile API
+- `nileSites.py` - Retrieves site information
+- `nileTenantUpdate.py` - Updates tenant data from the Nile API
+- `nileTree.py` - Retrieves the complete tenant hierarchy (sites, buildings, floors)
 - `package_lambdas.sh` - Script to package Lambda functions for deployment
 - `DEPLOYMENT.md` - Deployment guide for Lambda functions
 
@@ -62,6 +60,8 @@ When deployed behind API Gateway, the Lambda functions provide the following end
 - `GET /floors` - Get all floors for a tenant
 - `GET /segments` - Get all network segments for a tenant
 - `POST /tenantupdate` - Update tenant data
+- `GET, POST, PUT, DELETE /apikeys` - Manage API keys
+- `GET, PATCH /mabupdate` - Get client data and update MAB client states
 
 ## Error Handling
 
