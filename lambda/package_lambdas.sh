@@ -15,7 +15,6 @@ for lambda_file in nileSites.py nileBldg.py nileFloors.py nileSegments.py nileTr
   
   # Copy the Lambda function and utility files to the temp directory
   cp $lambda_file $temp_dir/
-  cp utils.py $temp_dir/
   
   # Copy api_utils.py if the Lambda function is nileTenantUpdate.py or nileMABUpdate.py
   if [[ "$lambda_file" == "nileTenantUpdate.py" || "$lambda_file" == "nileMABUpdate.py" ]]; then
