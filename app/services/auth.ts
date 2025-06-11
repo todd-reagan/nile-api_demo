@@ -14,7 +14,7 @@ const isBrowser = typeof window !== 'undefined';
 
 // Create a user pool with the configuration
 // Only create it if we're in a browser environment
-const userPool = isBrowser ? new CognitoUserPool({
+export const userPool = isBrowser ? new CognitoUserPool({
   UserPoolId: COGNITO_CONFIG.USER_POOL_ID,
   ClientId: COGNITO_CONFIG.APP_CLIENT_ID,
 }) : null;

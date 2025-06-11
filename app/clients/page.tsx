@@ -102,11 +102,51 @@ function ClientsContent() {
         const token = nileApiKey.key;
         const url = `https://u1.nile-global.cloud/api/v3/client-configs/tenant/${tenantId}`;
         
-        // Simplified fetch, original had complex retry not easily replicable here without more context
-        const response = await fetch(url, { headers: { 'x-nile-api-key': token.trim() } });
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const MAX_RETRIES = 5;
+        let retryCount = 0;
+        let response = null;
+        let responseData = null;
+
+        while (retryCount <= MAX_RETRIES) {
+          try {
+            if (retryCount > 0) {
+              const backoff = Math.random() * 4 + 1; // 1-5 seconds
+              console.log(`Retry ${retryCount}/${MAX_RETRIES} after ${backoff.toFixed(2)} seconds backoff`);
+              await new Promise(resolve => setTimeout(resolve, backoff * 1000));
+            }
+            
+            response = await fetch(url, {
+              headers: { 'x-nile-api-key': token.trim() }
+            });
+            
+            console.log(`Response received. Status: ${response.status}`);
+            
+            if (response.status === 401 || response.status === 400) {
+              retryCount++;
+              if (retryCount <= MAX_RETRIES) {
+                console.warn(`Received ${response.status}, will retry (${retryCount}/${MAX_RETRIES})`);
+                continue;
+              } else {
+                console.error(`Received ${response.status}, max retries (${MAX_RETRIES}) exceeded`);
+                throw new Error(`Request failed with status ${response.status} after ${MAX_RETRIES} retries`);
+              }
+            } else if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            responseData = await response.json();
+            break;
+          } catch (error) {
+            const fetchError = error as Error;
+            if (fetchError.name === 'TypeError' && retryCount < MAX_RETRIES) {
+              retryCount++;
+              console.warn(`Network error, will retry (${retryCount}/${MAX_RETRIES})`);
+              continue;
+            }
+            throw error;
+          }
+        }
         
-        const responseData = await response.json();
         setRawClientData(responseData as ClientDataItem[]);
       } catch (err) {
         console.error('Error fetching client data:', err);
@@ -205,7 +245,7 @@ function ClientsContent() {
   };
   
   if (loading) {
-    return <LoadingState message="Loading client information, buildings, and floors..." />;
+    return <LoadingState message="Loading client information..." />;
   }
 
   if (error) {

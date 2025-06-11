@@ -297,10 +297,6 @@ export default function ProfilePage() {
 
   // Render profile content
   const renderProfileContent = () => {
-    if (isLoading) {
-      return <LoadingState message="Loading profile..." />;
-    }
-
     return (
       <PageLayout title="User Profile">
         <div className="max-w-4xl mx-auto">
@@ -685,5 +681,5 @@ export default function ProfilePage() {
     );
   };
 
-  return <ProtectedRoute>{renderProfileContent()}</ProtectedRoute>;
+  return <ProtectedRoute message="Loading user profile...">{renderProfileContent()}</ProtectedRoute>;
 }

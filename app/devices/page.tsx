@@ -147,7 +147,7 @@ function DevicesPageContent() {
 
 
   if (loading) {
-    return <LoadingState message="Loading devices, buildings, and floors..." />;
+    return <LoadingState message="Loading device information..." />;
   }
 
   if (error) {

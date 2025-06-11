@@ -27,7 +27,6 @@ function extractUserIdFromToken(token: string): string | null {
         userId = payload.sub;
       }
       
-      console.log('Extracted user ID from token:', userId);
       return userId;
     }
   } catch (error) {

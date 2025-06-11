@@ -80,6 +80,18 @@ export default function SegmentsPage() {
           return;
         }
 
+        // Check for the required scope
+        try {
+          const decodedToken = JSON.parse(atob(nileApiKey.key.split('.')[1]));
+          if (!decodedToken.scope || !decodedToken.scope.includes('settings:read')) {
+            setRawDataError('The provided API key does not have the required "settings:read" scope.');
+            setRawDataLoading(false);
+            return;
+          }
+        } catch (e) {
+          // Could not decode API key as JWT, proceeding without scope check.
+        }
+
         const token = nileApiKey.key;
         const url = 'https://u1.nile-global.cloud/api/v1/settings/segments';
         
@@ -105,15 +117,15 @@ export default function SegmentsPage() {
             
             console.log(`Response received. Status: ${response.status}`);
             
-            // If response is 401, retry with backoff
-            if (response.status === 401) {
+            // If response is 401 or 400, retry with backoff
+            if (response.status === 401 || response.status === 400) {
               retryCount++;
               if (retryCount <= MAX_RETRIES) {
-                console.warn(`Received 401 Unauthorized, will retry (${retryCount}/${MAX_RETRIES})`);
+                console.warn(`Received ${response.status}, will retry (${retryCount}/${MAX_RETRIES})`);
                 continue;
               } else {
-                console.error(`Received 401 Unauthorized, max retries (${MAX_RETRIES}) exceeded`);
-                throw new Error(`Authentication failed after ${MAX_RETRIES} retries`);
+                console.error(`Received ${response.status}, max retries (${MAX_RETRIES}) exceeded`);
+                throw new Error(`Request failed with status ${response.status} after ${MAX_RETRIES} retries`);
               }
             } else if (!response.ok) {
               // For other non-200 responses, throw an error
@@ -151,7 +163,7 @@ export default function SegmentsPage() {
   }, [apiKeys]);
 
   if (loading || sitesLoading) {
-    return <LoadingState message="Loading data..." />;
+    return <LoadingState message="Loading segments..." />;
   }
 
   if (error) {

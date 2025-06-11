@@ -160,11 +160,37 @@ export default function PortViewer() {
   };
 
   // Renamed API functions to avoid conflict if they were defined elsewhere
+  const fetchWithRetry = async (url: string, options: RequestInit, maxRetries = 5) => {
+    let error: Error | null = null;
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        const res = await fetch(url, options);
+        if (res.ok) {
+          return res;
+        }
+        error = new Error(`API error: ${res.status}`);
+      } catch (e) {
+        error = e as Error;
+      }
+      await new Promise(resolve => setTimeout(resolve, 2 ** i * 100));
+    }
+    throw error;
+  };
+
   const fetchSegmentsApi = async (token: string) => {
     const url = `${NILE_API_BASE_URL}/settings/segments`;
     try {
-      const res = await fetch(url, { headers: { 'x-nile-api-key': token.trim() } });
-      if (!res.ok) throw new Error(`Segment API error: ${res.status}`);
+        // Check for the required scope
+        try {
+          const decodedToken = JSON.parse(atob(token.split('.')[1]));
+          if (!decodedToken.scope || !decodedToken.scope.includes('settings:read')) {
+            throw new Error('The provided API key does not have the required "settings:read" scope.');
+          }
+        } catch (e) {
+          // Could not decode API key as JWT, proceeding without scope check.
+        }
+      const res = await fetchWithRetry(url, { headers: { 'x-nile-api-key': token.trim() } });
+      if (!res) throw new Error(`Segment API error: Unknown`);
       const result = await res.json();
       return result?.data?.content || [];
     } catch (err) {
@@ -176,8 +202,8 @@ export default function PortViewer() {
   const fetchClientConfigsApi = async (token: string) => {
     const url = `${NILE_API_BASE_URL}/client-configs-list`;
     try {
-      const res = await fetch(url, { headers: { 'x-nile-api-key': token.trim() } });
-      if (!res.ok) throw new Error(`Client Configs API error: ${res.status}`);
+      const res = await fetchWithRetry(url, { headers: { 'x-nile-api-key': token.trim() } });
+      if (!res) throw new Error(`Client Configs API error: Unknown`);
       return await res.json();
     } catch (err) {
       console.error("Failed to fetch client configs:", err);
@@ -190,8 +216,8 @@ export default function PortViewer() {
     const startTime = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('.')[0] + 'Z';
     const url = `https://u1.nile-global.cloud/api/v1/public/client-list-paginated-details?endTime=${encodeURIComponent(endTime)}&startTime=${encodeURIComponent(startTime)}&pageNumber=0&pageSize=99999`;
     try {
-      const res = await fetch(url, { headers: { 'x-nile-api-key': token.trim() } });
-      if (!res.ok) throw new Error(`Online MACs API error: ${res.status}`);
+      const res = await fetchWithRetry(url, { headers: { 'x-nile-api-key': token.trim() } });
+      if (!res) throw new Error(`Online MACs API error: Unknown`);
       const data = await res.json();
       const onlineClients = (data.clientList || []).filter((c: any) => c.clientStatus === "ONLINE");
       return new Set(onlineClients.map((c: any) => c.macAddress.toLowerCase()));

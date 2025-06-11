@@ -7,9 +7,10 @@ import { LoadingState } from '../ui';
 
 interface ProtectedRouteProps {
   children: ReactNode;
+  message?: string;
 }
 
-export default function ProtectedRoute({ children }: ProtectedRouteProps) {
+export default function ProtectedRoute({ children, message }: ProtectedRouteProps) {
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
 
@@ -20,7 +21,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   }, [isLoading, isAuthenticated, router]);
 
   if (isLoading) {
-    return <LoadingState message="Checking authentication..." />;
+    return <LoadingState message={message || "Checking authentication..."} />;
   }
 
   if (!isAuthenticated) {
